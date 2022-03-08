@@ -19,6 +19,9 @@ dist/
 # Package files
 *.jar
 
+# VsCode IDE
+.vscode/
+
 # Maven
 target/
 dist/
