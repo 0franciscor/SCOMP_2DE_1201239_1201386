@@ -1,0 +1,2 @@
+Não conseguimos garantir que o output esteja sempre ordenado, visto que a execução dos processos existentes dependerá da seleção do escalonamento 
+efetuado pelo processador, estando este sujeito a várias condições que podem alterar esta ordem.
