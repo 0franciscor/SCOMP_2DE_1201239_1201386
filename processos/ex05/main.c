@@ -6,6 +6,8 @@
 
 int main(){
     int status;
+    int valor1; /* valor de saída do filho 1 */
+    int valor2; /* valor de saída do filho 2 */
     pid_t p1 = fork();
 
     if ( p1 == 0){
@@ -17,10 +19,16 @@ int main(){
             sleep(2);
             exit(2);
         } else if (p2 > 0){
-            wait(NULL);
-            wait(NULL);
-            printf("O filho retornou o valor: %d\n",WEXITSTATUS(status));
-            printf("O filho retornou o valor: %d\n",WEXITSTATUS(status));
+            waitpid(p1, &status, 0);
+            if (WIFEXITED(status)) {
+                valor1= WEXITSTATUS(status);
+            }  
+            waitpid(p2, &status, 0);
+            if (WIFEXITED(status)) {
+                valor2= WEXITSTATUS(status);
+            } 
+            printf("O filho 1 retornou o valor: %d\n",valor1);
+            printf("O filho 2 retornou o valor: %d\n",valor2);
         }
     }
 
