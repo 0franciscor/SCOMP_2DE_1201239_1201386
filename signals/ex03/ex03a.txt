@@ -1,0 +1,1 @@
+A função mais adequada para lidar com sinais é a função sigaction().

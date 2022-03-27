@@ -1,0 +1,14 @@
+A função sigaction() tem a seguinte estrutura:
+
+    #include <signal.h>
+    int sigaction(int sig, const struct sigaction * act, struct sigaction * oact);
+
+O argumento sig especifica qual é o sinal, sendo os valores possíveis os definidos em <signal.h>.
+A estrutura sigaction definida no cabeçalho de <signal.h> é composta pelos seguintes membros:
+    sa_handler: pointer para uma função de tratamento ANSI case
+    sa_sigaction: pointer para uma função de tratamento POSIX
+        Sendo que estes se podem sobrepor e por este motivo não se deve usar os dois em simultâneo.
+    sa_mask: conjunto de sinais a serem bloqueados durante o tratamento do sinal
+    sa_flags: conjunto de flags que modifica o comportamento do sinal
+Se o argumento act não for NULL ele especifica os detalhes da ação para o sinal sig.
+Se o argumento oact não for NULL é usado para armazenar os detalhes da ação definida anteriormente.
