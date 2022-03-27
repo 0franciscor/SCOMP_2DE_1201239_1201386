@@ -1,0 +1,1 @@
+Ao pressionar CTRL-C o programa foi interrompido encerrando assim o processo.
