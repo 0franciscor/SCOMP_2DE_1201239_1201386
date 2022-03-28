@@ -5,32 +5,29 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define ARRAY_SIZE 1000
 #define NUM_FILHOS 10
 
 int criarProcesso(int numProcesso);
  
 int main(){
-    srand (time(NULL));
     
-    int array[ARRAY_SIZE];
-    for(int i = 0; i < ARRAY_SIZE; i++){
-        array[i] = rand();
+    int array[2000];
+    for(int i = 0; i < 2000; i++){
+        array[i] = rand() % 1000;
     }
     
     int numProcesso = criarProcesso(NUM_FILHOS);
     
     if(numProcesso != -1){
 
-        int indexToFind = rand() % 999;
-        int numToFind = array[indexToFind];
+        int numToFind = array[rand() % 1000];
 
         int bottomScale = 0 + (numProcesso*200);
         int topScale = bottomScale + 199;
 
         for(int i = bottomScale; i < topScale; i++){
             if(array[i] == numToFind){
-                exit(i);
+                exit(i - bottomScale);
             }
         }
         exit(255);
