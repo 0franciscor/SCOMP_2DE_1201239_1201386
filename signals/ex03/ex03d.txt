@@ -1,0 +1,1 @@
+No código da função que trata o sinal não é possível usar variáveis globais ou estáticas com segurança.

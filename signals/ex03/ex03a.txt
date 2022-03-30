@@ -1,1 +1,10 @@
 A função mais adequada para lidar com sinais é a função sigaction().
+Existem vários motivos que fazem com que a função sigaction() seja mais adequada do que a função signal() no que diz respeito a lidar com sinais, 
+sendo alguns deles os seguintes:
+    - A função signal() bão bloqueia, necessariamente, a chegada de outros sinais enquanto o atual handler está em execução. Por outro lado, a função sigaction()
+    consegue bloquear outros sinais até que o handler atual retorna;
+    - O comportamento exato da função signal() pode variar entre os diferentes sistemas;
+    - A função sigaction() fornece um mecanismo mais abrangente e viavél para controlar sinais;
+    - A função sigaction() especifica mais informações do que a função signal();
+    - A função signal() redefine a ação do sinal de volta para SIG_DFL (ação padrão) para quase todos os sinais.
+Apesar da interface da função sigaction() ser mais complexa, devido ao fatores enunciados anteriormente é preferivél.
