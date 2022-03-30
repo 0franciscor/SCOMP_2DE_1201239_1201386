@@ -1,0 +1,2 @@
+Sempre que foi realizado ou o comando kill -SIGQUIT PID ou o comando kill -SIGINT PID a devida mensagem foi apresentada no ecrã.
+Isto acontece pois a função chamaria a função handler e esta impede que os processos terminem recebendo um dos dois sinais em cima mencionados.

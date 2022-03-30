@@ -1,0 +1,2 @@
+A função printf() não é uma função reentrante, ou seja, não é uma função que pode ser chamada por mais de um processo e ainda assim, executar sempre corretamente. 
+Por este motivo em vez de printf() devemos usar a função write() nos handlers de sinais.

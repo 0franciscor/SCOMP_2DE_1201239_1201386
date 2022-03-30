@@ -1,0 +1,1 @@
+kill %1 significa matar o job número 1, não o processo número 1.

@@ -6,13 +6,13 @@
 #include <sys/wait.h>
 
 void handle_signais(int sig) {
-	char mensagem[100];
+	char info[100];
 	if(sig == SIGINT){
-		sprintf(mensagem, "I won't let the process end with CTRL-C!\n");
+		sprintf(info, "I won't let the process end with CTRL-C!\n");
     } else if (sig == SIGQUIT) {
-		sprintf(mensagem, "I won't let the process end with CTRL-\\!\n");
+		sprintf(info, "I won't let the process end with CTRL-\\!\n");
     }
-	write(STDOUT_FILENO, mensagem, strlen(mensagem));
+	write(STDOUT_FILENO, info, strlen(info));
 }
 
 int main(int argc, char* argv[]) {

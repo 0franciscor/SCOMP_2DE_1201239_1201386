@@ -1,1 +1,2 @@
-Ao pressionar CTRL-C o programa foi interrompido encerrando assim o processo.
+Ao pressionar CTRL-C o programa foi interrompido encerrando assim o processo e terminando assim com o loop for infinito.
+Isto acontece, pois as teclas ao serem pressionadas em conjunto enviam o sinal SIGINT para o processo.

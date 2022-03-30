@@ -1,0 +1,2 @@
+Ao pressionar Ctrl-\ o programa é terminado.
+Isto acontece, pois as teclas ao serem pressionadas em conjunto enviam o sinal SIGQUIT para o processo, sinal muito parecido ao SIGINT.
