@@ -1,0 +1,1 @@
+This text is on a file and is being read by a child process through a pipe.
