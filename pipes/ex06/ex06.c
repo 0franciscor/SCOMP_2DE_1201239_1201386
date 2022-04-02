@@ -5,19 +5,18 @@
 #include <sys/wait.h>
 #define ARRAY_MAX_SIZE 1000
 
-int main(){
+struct pipeStruct {
+    int array1[ARRAY_MAX_SIZE];
+    int array2[ARRAY_MAX_SIZE];
+};
 
-    // Criacao dos Arrays
+int main(){
 
     int array1[ARRAY_MAX_SIZE];
     int array2[ARRAY_MAX_SIZE];
 
-    for(int i = 0; i < ARRAY_MAX_SIZE; i++){
-        array1[i] = 1;
-        array2[i] = 1;
-    }
+    for(int i = 0; i < ARRAY_MAX_SIZE; i++){array1[i] = 1;array2[i] = 1;}
 
-    // Criacao de procs filhos para calcular as somas de diferentes posicoes
 
     pid_t p;
     int soma = 0;
@@ -32,14 +31,13 @@ int main(){
 
         close(fd[0]);
         write(fd[1], &array1, sizeof(array1));
-        write(fd[1], &array2, sizeof(array2));
+        //write(fd[1], &array2, sizeof(array2));
         close(fd[1]);
         
         int fd2[2];
         
         p = fork();
         if(p == 0){
-            
             close(fd[1]);
             int arrayReceived1[ARRAY_MAX_SIZE];
             int arrayReceived2[ARRAY_MAX_SIZE];
@@ -57,6 +55,8 @@ int main(){
                 return -1;
             }
             
+            printf("chega aqui %d \n", temp);
+
             close(fd2[0]);
             write(fd2[1], &temp, sizeof(int));
             close(fd2[1]);
@@ -71,6 +71,7 @@ int main(){
         close(fd2[0]);
         soma += readValue;
     }    
+    
 
     printf("A soma dos valores é: %d\n", soma);
 
