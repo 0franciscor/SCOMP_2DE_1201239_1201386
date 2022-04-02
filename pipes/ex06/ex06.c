@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/wait.h>
 #define ARRAY_MAX_SIZE 1000
 
@@ -38,8 +39,8 @@ int main(){
         
         p = fork();
         if(p == 0){
+            
             close(fd[1]);
-
             int arrayReceived1[ARRAY_MAX_SIZE];
             int arrayReceived2[ARRAY_MAX_SIZE];
             read(fd[0], &arrayReceived1, sizeof(arrayReceived1));
@@ -58,7 +59,6 @@ int main(){
             
             close(fd2[0]);
             write(fd2[1], &temp, sizeof(int));
-            close(fd2[1]);
             close(fd2[1]);
             
             exit(0);

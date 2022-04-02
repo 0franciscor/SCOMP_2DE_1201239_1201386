@@ -8,7 +8,7 @@
 int createProcess();
 void handle_signal(int sign);
 
-int numProcessos = 0, maxProcessos = 5;
+sig_atomic_t numProcessos = 0, maxProcessos = 5;
 
 int main(){
 
