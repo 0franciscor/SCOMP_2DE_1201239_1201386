@@ -40,7 +40,7 @@ int main(){
 
         close(fd[0]);
         close(fd2[1]);
-        exit(0);
+        return 0;
     }
     
     
