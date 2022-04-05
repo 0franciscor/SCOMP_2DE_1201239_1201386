@@ -6,87 +6,98 @@
 #include <string.h>
 #include <sys/wait.h>
 
-bool simula1();
-bool simula2();
-void createChild(pid_t processArray[50]);
-void handleUSR1(int sig);
-void handleUSR2(int sig);
+sig_atomic_t simula1();
+sig_atomic_t simula2();
+void handleSignal(int sig);
+void handleSignalChild(int sig);
 
-bool efficientAlgorithm = false;
-int numProcessos = 0;
+sig_atomic_t finishedProcs = 0, efficientAlgorithm = 0;
 
 int main(){
 
-    struct sigaction actUSR1;
-    struct sigaction actUSR2;
+    struct sigaction act;
 
-    memset(&actUSR1, 0, sizeof(struct sigaction));
-    memset(&actUSR2, 0, sizeof(struct sigaction));
-    sigemptyset(&actUSR1.sa_mask); /* No signals blocked */
-    sigemptyset(&actUSR2.sa_mask); /* No signals blocked */
-    actUSR1.sa_handler = handleUSR1;
-    actUSR2.sa_handler = handleUSR2;
-    sigaction(SIGUSR1, &actUSR1, NULL);
-    sigaction(SIGUSR2, &actUSR2, NULL);
+    memset(&act, 0, sizeof(struct sigaction));
+    sigemptyset(&act.sa_mask); /* No signals blocked */
+    act.sa_handler = handleSignal;
+    sigaction(SIGUSR1, &act, NULL);
+    sigaction(SIGUSR2, &act, NULL);
 
     pid_t processArray[50];
+    pid_t p;
+    int index; 
+
+    for(int i = 0; i < 50; i++){
+        p = fork();
+        if(p == 0){
+            index = i;
+            break;
+        }
+        processArray[i] = p;
+    }
+        
+    if(p == 0){
+        pid_t fProcess = getppid();
+
+        if(index < 25){
+            if(simula1() != 0){
+                kill(fProcess, 10); //USR1
+            } else{
+                kill(fProcess, 12); //USR2
+            }
+        }
+        pause();
+        if(efficientAlgorithm == 1){
+            simula2();
+        }
+        exit(0);
+    }
+
+    while(finishedProcs < 25) {
+        printf("%d processes finished Simula1\n", finishedProcs);
+        sleep(1);
+    }
+
+    if(efficientAlgorithm == 0) {
+        printf("Inefficient algorithm!\n");
+        for(int i = 0; i < 50; i++) {
+            kill(processArray[i], 9);
+        }
+    } else {
+        act.sa_handler = handleSignalChild;
+        sigaction(SIGUSR1, &act, NULL);
+        
+        for(int i = 0; i < 50; i++) {
+            kill(processArray[i], SIGUSR1);
+        }
+
+        for(int i = 0; i < 50; i++) {
+            waitpid(processArray[i], NULL, 0);
+            printf("Process: %d finished task2\n", processArray[i]);
+        }
+        
+    }
     
-    createChild(processArray);
 
     return 0;
 }
 
-void createChild(pid_t processArray[50]){
-    
-    for(int i = 0; i < 50; i++){
-        pid_t p = fork();
-        processArray[i] = p;
-
-        if(p == 0){
-            bool sim1Result = simula1();
-            pid_t fProcess = getppid();
-            
-            if(sim1Result)
-                kill(fProcess, 10);
-            else
-                kill(fProcess, 12);
-            
-            sleep(1);
-
-            exit(0);
-        }
-        
-        if(p != 0 && i == 24 && numProcessos == 25){
-            if(!efficientAlgorithm){
-                printf("Inefficient algorithm!\n");
-                for(int j = 0; j < 24; j++){
-                    kill(processArray[j], 9);
-                }
-                break;
-            }
-                
-            else{
-                for(int j = 0; j < 24; j++){
-                    kill(processArray[j], 12);
-                }
-            }
-        }
-    }
+sig_atomic_t simula1(){
+    sleep(1);
+    return 0;
 }
 
-bool simula1(){
-    return 0 + (rand() % (1 - 0 + 1)) == 1;
+sig_atomic_t simula2(){
+    sleep(1);
+    return 1;
 }
 
-bool simula2(){
-    return true;
+void handleSignal(int sig){
+    finishedProcs++;
+    if(sig == 10)
+        efficientAlgorithm = 1;
 }
 
-void handleUSR1(int sig){
-    numProcessos++;
-    efficientAlgorithm = true;
-}
-
-void handleUSR2(int sig){
-    simula2();
+void handleSignalChild(int sig){
+    efficientAlgorithm = 1;
 }
