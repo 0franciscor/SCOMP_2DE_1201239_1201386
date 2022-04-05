@@ -5,6 +5,11 @@
 #include <sys/wait.h>
 #include <string.h>
 
+struct pipeStruct{
+    char frase1[20];
+    char frase2[20];
+};
+
 int main(int argc, char* argv[]) {
     int fd[2];
     pipe(fd);
@@ -14,40 +19,32 @@ int main(int argc, char* argv[]) {
 
         close(fd[0]);
     
-        char frase1[] = "Hello World";
-        int size = strlen(frase1);
-        write(fd[1], &size, sizeof(int));
-		write(fd[1], frase1, strlen(frase1));
-		
-		char frase2[] = "Goodbye!";
-        size = strlen(frase2);
-        write(fd[1], &size, sizeof(int));
-		write(fd[1], frase2, strlen(frase2));
+        struct pipeStruct mensagens;
+        strcpy(mensagens.frase1,"Hello World");
+        strcpy(mensagens.frase2,"Goodbye!");
+        
+		write(fd[1], &mensagens, sizeof(mensagens));
+
+        close(fd[1]);
 		
         int status;
 
 		waitpid(p, &status, 0);
 		printf("Child %d exited with value %d.\n", p, WEXITSTATUS(status));
-		
-		close(fd[1]);
 
     } else if (p==0){
 
         close(fd[1]);
-		
-		char frase1[100];
-		char frase2[100];
-        int size;
-		
-        read(fd[0], &size, sizeof(int));
-        read(fd[0], frase1, sizeof(char) * size);
-		printf("%s\n", frase1);
 
-		read(fd[0], &size, sizeof(int));
-        read(fd[0], frase2, sizeof(char) * size);
-		printf("%s\n", frase2);
+        struct pipeStruct recebido;
 		
+        read(fd[0], &recebido, sizeof(recebido));
+        
 		close(fd[0]);
+        
+		printf("%s\n", recebido.frase1);
+		printf("%s\n", recebido.frase2);
+	
 		exit(0);
 
     }
