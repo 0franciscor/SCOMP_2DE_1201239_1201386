@@ -17,8 +17,24 @@ struct product {
     float price;
 };
 
-int createChild(int productPipe[2]);
-int numGenerator();
+int createChild(){
+    pid_t p;
+    for(int i = 1; i <= 5; i++){
+        p = fork();
+        if(p == 0)
+            return i;
+        //sleep(2);
+    }
+    return -1;
+}
+
+int numGenerator(){
+    srand(time(0));
+    int lower = 1, upper = 5;
+    int numToGuess = (rand() % (upper - lower + 1)) + lower;
+
+    return numToGuess;
+}
 
 int main(){
 
@@ -45,21 +61,29 @@ int main(){
     productToAdd.price = 0;
     productArray[3] = productToAdd;
 
-    int productPipe[2];
+    int cPipe[6][2]; //cPipe[0] é o pipe para fazer requests
 
-    int requestPipe[2];
-
-    if(pipe(requestPipe) == -1){
-        printf("Error when creating Pipe");
-        return -1;
+    for(int i = 0; i < 6; i++){
+        if(pipe(cPipe[i]) == -1){
+            printf("Error when creating Pipe\n");
+            return -1;
+        }
     }
-
-    int processIndex = createChild(productPipe);
+    
+     // fecho de leitura de pipe comum escrita
+    int processIndex = createChild();
 
     if(processIndex != -1){
-        close(requestPipe[0]);
-        close(productPipe[1]);
         
+        for(int i = 1; i < 6; i++){
+            if(processIndex != i){
+                close(cPipe[i][0]);
+                close(cPipe[i][1]);
+            }
+        }
+
+        close(cPipe[0][0]);    
+        close(cPipe[processIndex][1]); // fecho de ecrita de pipe individual
         
         for(;;){
             int requestedBarcode = numGenerator();
@@ -68,29 +92,36 @@ int main(){
             request.barcode = requestedBarcode;
             request.childID = processIndex;
 
-            write(requestPipe[1], &request, sizeof(request));
+            write(cPipe[0][1], &request, sizeof(request));
 
             struct product requestedProduct;
 
-            read(productPipe[0], &requestedProduct, sizeof(requestedProduct));
+            read(cPipe[processIndex][0], &requestedProduct, sizeof(requestedProduct));
 
             printf("Requested Product - Barcode: %d PID: %d\n", requestedBarcode, getpid());            
             printf("Received Product - Barcode: %d Name: %s Price: %.2f\n\n", requestedProduct.barcode, requestedProduct.name, requestedProduct.price);
 
-            sleep(1);
+            sleep(2);
     
         }
-        close(requestPipe[1]);
-        close(productPipe[0]);
+        close(cPipe[0][1]);
+        close(cPipe[processIndex][0]);
+        
         return 0;
     }
 
-    close(requestPipe[1]);
-    close(productPipe[0]);
+    close(cPipe[0][1]);
+    for(int i = 1; i < 6; i++){
+        close(cPipe[i][0]);
+    }
 
     struct request request;
-    while(read(requestPipe[0], &request, sizeof(request)) != 0){
-    
+
+    while(read(cPipe[0][0], &request, sizeof(request)) != 0){
+        
+        int processIndex = request.childID;
+        close(cPipe[processIndex][0]);
+        
         struct product productToSend;
 
         for(int i = 0; i < PRODUCT_LIST; i++){
@@ -101,36 +132,14 @@ int main(){
             productToSend = productArray[i];
         }
 
-        write(productPipe[1], &productToSend, sizeof(productToSend));
+        write(cPipe[processIndex][1], &productToSend, sizeof(productToSend));
+        sleep(1);
     }
 
-    close(requestPipe[0]);4
-    close(productPipe[1]);
+    close(cPipe[0][0]);
+    for(int i = 1; i < 6; i++){
+        close(cPipe[i][1]);
+    }
 
     return 0;
-}
-
-int createChild(int productPipe[2]){
-    pid_t p;
-    for(int i = 0; i < 5; i++){
-        
-        if(pipe(productPipe) == -1){
-            printf("Error when creating Pipe");
-            return -1;
-        }  
-
-        p = fork();
-        if(p == 0)
-            return i;
-        sleep(2);
-    }
-    return -1;
-}
-
-int numGenerator(){
-    srand(time(0));
-    int lower = 1, upper = 5;
-    int numToGuess = (rand() % (upper - lower + 1)) + lower;
-
-    return numToGuess;
 }
