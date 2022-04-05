@@ -8,7 +8,7 @@
 int createProcess();
 void handle_signal(int sign);
 
-sig_atomic_t numProcessos = 0, maxProcessos = 5;
+sig_atomic_t numProcessos = 0, maxProcessos = 6;
 
 int main(){
 
@@ -16,7 +16,7 @@ int main(){
     memset(&act, 0, sizeof(struct sigaction));
     sigemptyset(&act.sa_mask); /* No signals blocked */
     act.sa_handler = handle_signal;
-    sigaction(SIGUSR1, &act, NULL);
+    sigaction(SIGCHLD, &act, NULL);
 
     for(int i = 0; i < maxProcessos; i++){
         int processIndex = createProcess();
@@ -26,9 +26,7 @@ int main(){
             int max = (processIndex + 5) * 200;
             printf("Interval is [%d, %d]\n", min, max);
             
-            pid_t fProcess = getppid();
-            kill(fProcess, 10);
-            return 0;
+            exit(0);
         }
 
     }
@@ -36,16 +34,19 @@ int main(){
     return 0;
 }
 
-int createProcess(){
-    numProcessos++;
-    
+int createProcess(){    
+    pid_t p;
+
     if(numProcessos <= maxProcessos){
-        pid_t p = fork();
+        p = fork();
 
         if(p == 0)
             return numProcessos;
-        else
+        else{
+            int status;
             pause();
+            waitpid(p, &status, 0);
+        }
 
     }
     return -1;
@@ -54,7 +55,8 @@ int createProcess(){
 
 void handle_signal(int sign){
     char mensagem[60];
-    sprintf(mensagem, "SIGUSR1 signal captured, There are still %d processes left.\n", (5-numProcessos));
+    sprintf(mensagem, "SIGCHLD signal captured, There are %d processes left.\n", (5-numProcessos));
     
 	write(STDOUT_FILENO, mensagem, strlen(mensagem));
+    numProcessos++;
 }
