@@ -1,1 +1,2 @@
 No código da função que trata o sinal não é possível usar variáveis globais ou estáticas com segurança.
+Isto acontece devido ao facto que as variáveis globais e estáticas são acessíveis a mais do que uma função podendo colocar as variáveis num estado inconsistente.
