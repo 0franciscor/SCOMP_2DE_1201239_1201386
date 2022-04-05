@@ -5,18 +5,32 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <time.h>
 
-sig_atomic_t simula1();
-sig_atomic_t simula2();
-void handleSignal(int sig);
-void handleSignalChild(int sig);
+sig_atomic_t finishedProcs = 0;
+bool efficientAlgorithm = false;
 
-sig_atomic_t finishedProcs = 0, efficientAlgorithm = 0;
+void handleSignal(int sig){
+    finishedProcs++;
+    if(sig == 10)
+        efficientAlgorithm = true;
+}
+
+void handleSignalChild(int sig){
+    efficientAlgorithm = true;
+}
+
+bool simula1(){
+    return false; //testing purposes
+}
+
+bool simula2(){
+    return true; //testing purposes
+}
 
 int main(){
 
     struct sigaction act;
-
     memset(&act, 0, sizeof(struct sigaction));
     sigemptyset(&act.sa_mask); /* No signals blocked */
     act.sa_handler = handleSignal;
@@ -35,37 +49,45 @@ int main(){
     }
         
     if(p == 0){
+        struct sigaction act2;
+        memset(&act2, 0, sizeof(struct sigaction));
+        sigemptyset(&act2.sa_mask); /* No signals blocked */
+        act2.sa_handler = handleSignalChild;
+        sigaction(SIGUSR1, &act2, NULL);
+
         pid_t fProcess = getppid();
 
-        if(simula1() != 0){
+        if(simula1()){
             kill(fProcess, 10); //USR1
         } else{
             kill(fProcess, 12); //USR2
         }
+
+        struct timespec aux, aux2;
+        aux.tv_sec = 0;
+        aux.tv_nsec = 500000000L;
+        nanosleep(&aux, &aux2);
         
         pause();
-        if(efficientAlgorithm == 1){
+        
+        if(efficientAlgorithm){
             simula2();
         }
         exit(0);
-    }
+    }   
 
-    while(finishedProcs < 25) {
-        printf("%d - Simula1\n", finishedProcs);
+    while(finishedProcs < 25){
         sleep(1);
+        printf("%d - Simula1\n", finishedProcs);
     }
-
-    if(efficientAlgorithm == 0) {
+    
+    if(!efficientAlgorithm) {
         printf("Inefficient algorithm!\n");
 
         for(int i = 0; i < 50; i++) {
             kill(processArray[i], 9);
         }
-
     } else {
-        act.sa_handler = handleSignalChild;
-        sigaction(SIGUSR1, &act, NULL);
-
         for(int i = 0; i < 50; i++) {
             kill(processArray[i], SIGUSR1);
         }
@@ -74,27 +96,9 @@ int main(){
             waitpid(processArray[i], NULL, 0);
             printf("Simula 2 - Process: %d\n", processArray[i]);
         }
-        
     }
     
-
+    
     return 0;
 }
 
-sig_atomic_t simula1(){
-    return 0; //testing purposes
-}
-
-sig_atomic_t simula2(){
-    return 1; //testing purposes
-}
-
-void handleSignal(int sig){
-    finishedProcs++;
-    if(sig == 10)
-        efficientAlgorithm = 1;
-}
-
-void handleSignalChild(int sig){
-    efficientAlgorithm = 1;
-}
