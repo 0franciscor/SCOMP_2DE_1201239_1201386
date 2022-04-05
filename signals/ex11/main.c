@@ -25,12 +25,11 @@ int main(int argc, char* argv[]) {
 	sigaction(SIGCHLD, &act, NULL);
 
 	comando comandos[QUANTIDADE_COMANDOS];
-	strcpy(comandos[0].cmd, "SCOMP");
+	strcpy(comandos[0].cmd, "./exemplo1");
 	comandos[0].tempo = 7;
-	strcpy(comandos[1].cmd, "SCOMP");
-	comandos[1].tempo = 5;
-	
-	
+	strcpy(comandos[1].cmd, "./exemplo1");
+	comandos[1].tempo = 3;
+
 	pid_t p;
 	
 	int ret;
