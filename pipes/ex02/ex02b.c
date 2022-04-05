@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -7,7 +8,7 @@
 struct pipeStruct{
     int numStruct;
     char stringStruct[20];
-}
+};
 
 int main(){
 
@@ -30,8 +31,8 @@ int main(){
         scanf("%s", string);
 
         struct pipeStruct fStruct;
-        s.numStruct = num;
-        strcpy(s.stringStruct, string);
+        fStruct.numStruct = num;
+        strcpy(fStruct.stringStruct, string);
 
         close(fd[0]);
         write(fd[1], &fStruct, sizeof(fStruct));
@@ -42,7 +43,7 @@ int main(){
     } else if (p == 0){
         close(fd[1]);
 
-        struct s sonStruct;
+        struct pipeStruct sonStruct;
 		
         read(fd[0], &sonStruct, sizeof(sonStruct));
 		close(fd[0]);

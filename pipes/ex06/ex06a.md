@@ -1,0 +1,2 @@
+> Explain why the there is no need for a synchronization mechanism? Take a look at the pipe function complete man pages.
+>>"Data written to the write end of the pipe is buffered by the kernel until it is read from the read  end of the pipe."
