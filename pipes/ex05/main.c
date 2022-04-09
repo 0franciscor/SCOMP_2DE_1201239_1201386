@@ -16,13 +16,14 @@ int main(int argc, char* argv[]) {
 	int up[2], down[2];
 
 	if(pipe(up) == -1 || pipe(down) == -1) {
+		perror("Pipe Falhou");
 		return 1;
 	}
 
 	pid_t pid = fork();
     
 	if(pid == -1) {
-
+		perror("Fork Falhou");
 		return 2;
 
 	} else if( pid > 0) {
@@ -38,6 +39,8 @@ int main(int argc, char* argv[]) {
 		for (int i = 0; i < strlen(texto.mensagem); i++) {
 			if (*(texto.mensagem + i) > 96 && *(texto.mensagem + i) < 123) {
 				*(texto.mensagem + i) = *(texto.mensagem + i) - 32;
+			} else if(*(texto.mensagem + i)>64 && *(texto.mensagem + i)<91){
+				*(texto.mensagem + i) = *(texto.mensagem + i) + 32;
 			}
 		}
         
