@@ -22,7 +22,7 @@ int main(){
 	
 	for(int i = 0; i < MAQUINAS; i++) {
 		if (pipe(fd[i]) == -1){
-            perror("Pipe failed!");
+            perror("Pipe Falhou!");
             exit(-1);
         }
 	}
