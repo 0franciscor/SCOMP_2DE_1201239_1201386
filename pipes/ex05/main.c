@@ -5,10 +5,10 @@
 #include <sys/wait.h>
 #include <string.h>
 
-#define MAX_SYZE 256
+#define MAX_SIZE 256
 
 struct pipeStruct{
-    char mensagem[MAX_SYZE];
+    char mensagem[MAX_SIZE];
 };
 
 int main(int argc, char* argv[]) {
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 		struct pipeStruct str_upper;
 
 		printf("Mensagem: ");
-		fgets(mensagens.mensagem, MAX_SYZE, stdin);
+		fgets(mensagens.mensagem, MAX_SIZE, stdin);
 		
 		mensagens.mensagem[strlen(mensagens.mensagem) -1] = '\0';
 	
