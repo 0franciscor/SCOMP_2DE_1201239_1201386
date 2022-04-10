@@ -5,10 +5,8 @@ main: main.o
 main.o: main.c 
 	gcc -Wall -g -c main.c
 
-run: main
+run: main 
 	./main
 
 clean:
 	rm *.o main
-
-	

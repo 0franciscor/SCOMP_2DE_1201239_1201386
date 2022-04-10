@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 #include <string.h>
 
-#define SYZE 1000
+#define SIZE 1000
 #define QUANT_FILHOS 5
 
 struct pipeStruct{
@@ -17,20 +17,20 @@ int main(int argc, char* argv[]) {
 	
 	int fd[QUANT_FILHOS][2];
 	
-	int vec1[SYZE];
-	int	vec2[SYZE];
+	int vec1[SIZE];
+	int	vec2[SIZE];
 
 	time_t t; 
     srand((unsigned)time(&t));
 
-    for (int i = 0; i < SYZE; i++){
+    for (int i = 0; i < SIZE; i++){
         vec1[i] = rand() % (11);
         vec2[i] = rand() % (11);
     }
 
 	pid_t pid;
 
-	for(int i = 0; i < 5; i++) {
+	for(int i = 0; i < QUANT_FILHOS; i++) {
 		if(pipe(fd[i]) == -1){
             perror("Pipe Falhou");
             return 1;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	
-	int resultado[SYZE];
+	int resultado[SIZE];
 	for(int i = 0; i < QUANT_FILHOS; i++) {
         close(fd[i][1]);
         wait(NULL);
@@ -77,9 +77,10 @@ int main(int argc, char* argv[]) {
             resultado[i]= resultados.soma[aux];
             aux++;
         }
+        close(fd[i][0]);
     }
 
-    for (int i = 0; i < SYZE; i++) {
+    for (int i = 0; i < SIZE; i++) {
         printf(" Valor Vec1: %d \n", vec1[i]);
         printf(" Valor Vec2: %d \n", vec2[i]);
         printf(" Soma: %d \n", resultado[i]);
