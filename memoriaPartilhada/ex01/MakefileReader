@@ -1,0 +1,13 @@
+
+Reader: reader.o
+	gcc -g -Wall reader.o -o Reader -lrt
+
+reader.o: reader.c
+	gcc -g -Wall -c reader.c -o reader.o -lrt
+
+run: Reader
+	clear
+	./Reader
+
+clean:
+	rm reader.o Reader
