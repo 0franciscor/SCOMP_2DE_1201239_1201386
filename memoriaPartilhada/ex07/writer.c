@@ -19,14 +19,14 @@ int main(int argc, char* argv[]) {
     int size = sizeof(info); 
 	info* infoPartilhada;
 
-	int fd = shm_open("/ex2",O_CREAT|O_EXCL|O_RDWR,S_IRUSR|S_IWUSR); 
+	int fd = shm_open("/ex7",O_CREAT|O_EXCL|O_RDWR,S_IRUSR|S_IWUSR); 
 
     // Creates (O_CREAT) shared memory area (with error if existis because of O_EXCL) with name “/shmtest”, 
     // and read/write permissons (O_RDWR), and open for user to read (S_IRUSR) and write (S_IWUSR).
 	
 	if(fd == -1){
 		perror("Memória Partilhada já existe");
-		shm_unlink("/ex2");
+		shm_unlink("/ex7");
 		return 1;
 	}	
 	
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 		exit(2);
 	}
 
-    if((infoPartilhada = (info*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0) == MAP_FAILED) {
+    if((infoPartilhada = (info*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0) == MAP_FAILED)) {
 		perror("Mapping Memória Partilhada Falhou");
 		exit(3);
 	}
@@ -48,7 +48,8 @@ int main(int argc, char* argv[]) {
     srand((unsigned)time(&t));
 
     for (int i = 0; i < ARRAY_SIZE; i++){
-        infoPartilhada->numeros[i] = rand() % (21); // escrever na memória partilhada
+        int randomNumber = (rand() % (20 - 1 + 1)) + 1;
+        *(infoPartilhada->numeros + i) = randomNumber; // escrever na memória partilhada
     }
 
     return 0;
