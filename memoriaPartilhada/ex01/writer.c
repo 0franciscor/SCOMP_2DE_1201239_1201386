@@ -26,13 +26,13 @@ int main(int argc, char* argv[]) {
     // and read/write permissons (O_RDWR), and open for user to read (S_IRUSR) and write (S_IWUSR).
 	
 	if(fd == -1){
-		perror("Memória Partilhada já existe");
+		perror("Creating or opening shared memory failure");
 		shm_unlink("/ex1");
 		return 1;
 	}	
 	
 	if(ftruncate(fd,size) == -1) {
-		perror("Truncar Memória Partilhada Falhou");
+		perror("Truncating shared memory failure");
 		return 2;
 	}
 	
@@ -49,6 +49,19 @@ int main(int argc, char* argv[]) {
 	strcpy((infoPartilhada->nome), str); // escrever na memória partilhada
 	printf("Número:");
 	scanf("%d", &infoPartilhada->numero); // escrever na memória partilhada
+
+	
+    if (munmap((void *)infoPartilhada, size) < 0) {
+        printf("Error at munmap()!\n");
+        return 3;
+    }
+
+    
+    if (close(fd) < 0) {
+        printf("Error at close()!\n");
+        return 4;
+    }
+
 
     return 0;
 
