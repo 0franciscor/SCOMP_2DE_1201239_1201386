@@ -31,7 +31,11 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}	
 	
-	ftruncate(fd,size);
+	if(ftruncate(fd,size) == -1) {
+		perror("Truncar Memória Partilhada Falhou");
+		return 2;
+	}
+	
 	infoPartilhada = (aluno*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0);
 
     // Maps the area in na address decided by the OS (NULL), requring to use all the size, with

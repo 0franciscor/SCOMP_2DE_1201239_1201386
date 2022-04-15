@@ -26,8 +26,12 @@ int main(int argc, char* argv[]) {
 		perror("Erro Memória Partilhada");
 		return 1;
 	}	
+
+	if(ftruncate(fd,size) == -1) {
+		perror("Truncar Memória Partilhada Falhou");
+		return 2;
+	}
 	
-	ftruncate(fd,size);
 	infoPartilhada = (aluno*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0);
 	
 	printf("Nome: %s", infoPartilhada->nome);
