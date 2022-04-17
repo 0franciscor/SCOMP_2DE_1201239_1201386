@@ -8,9 +8,8 @@
 
 int main(){
     
-    clock_t t;
-    t = clock();
-
+    time_t start = time(NULL);
+    
     int fd[2];
 
     if(pipe(fd) == -1){
@@ -26,28 +25,30 @@ int main(){
     }
 
     if(p == 0){
-        int arrayRead[ARRAY_SIZE];
         close(fd[1]);
-        read(fd[0], &arrayRead, sizeof(arrayRead));
+        int num;
+        for(int i = 0; i < ARRAY_SIZE; i++){
+            read(fd[0], &num, sizeof(int));
+            printf("O número é: %d\n", num);
+        }
         close(fd[0]);
         exit(0);
     }
 
+    close(fd[0]);
     int array[ARRAY_SIZE];
     for(int i = 0; i < ARRAY_SIZE; i++){
-        array[i] = 1;
+        array[i] = i;
+        write(fd[1], &array[i], sizeof(int));
     }
-
-    close(fd[0]);
-    write(fd[1], &array, sizeof(array));
     close(fd[1]);
 
     wait(NULL);
 
-    t = clock() - t;
-    double time_taken = ((double)t)/CLOCKS_PER_SEC;
+    time_t end = time(NULL);
+    int total = end - start;
+    printf("Tempo de execução: %ds\n", total);
     
-    printf("Tempo de execução: %.2f\n", time_taken);
 
     return 0;
 }
