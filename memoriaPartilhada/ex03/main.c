@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/wait.h>
+#include <string.h>
 
 #define WORD_SIZE 20
 #define ARRAY_SIZE 100000
@@ -22,15 +23,8 @@ typedef struct{
 
 int main(int argc, char* argv[]) {
 
-    int size = sizeof(info); 
+    int size = sizeof(struct info); 
 	enviar *infoPartilhada;
-
-    int fd[2];
-
-    if(pipe(fd) == -1){
-        perror("There was an error when creating the Pipe.\n");
-        return -1;
-    }
 
     time_t start = time(NULL);
 
@@ -56,7 +50,7 @@ int main(int argc, char* argv[]) {
         infoPartilhada->arr[i] = informacao;
     }
 
-    pid_t p = fork();
+    pid_t pid = fork();
 
     if(pid == -1){
         perror("Fork Falhou");
@@ -64,12 +58,8 @@ int main(int argc, char* argv[]) {
 
     } else if (pid == 0){
 
-        if((fd = shm_open("/ex3", O_RDWR, S_IRUSR | S_IWUSR)) == -1) {
-		    perror("Creating or opening shared memory failure");
-		    return 3;
-	    }
-
-
+        enviar *infoRecebida;
+        infoRecebida = (enviar*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0);
 
         if (munmap(infoPartilhada, size) < 0) {
             printf("Error at munmap()!\n");
@@ -108,23 +98,36 @@ int main(int argc, char* argv[]) {
     }
 
 
-    time_t start = time(NULL);
+    time_t inicio = time(NULL);
+
+    int pp[2];
+
+    if(pipe(pp) == -1){
+        perror("There was an error when creating the Pipe.\n");
+        return -1;
+    }
 
     pid_t p = fork();
 
-    if(pid == -1){
+    if(p == -1){
         perror("Fork Falhou");
         return 3;
 
-    } else if (pid == 0){
+    } else if (p == 0){
 
+        close(pp[1]);
 
+        enviar *infoRecebida;
 
+        read(pp[0], &infoRecebida, sizeof(infoRecebida));
+
+        close(pp[0]);
+        exit(1);
     }
 
-    time_t end = time(NULL);
-    int total = end - start;
-    printf("Tempo de execução pipes: %ds\n", total);
+    time_t stop = time(NULL);
+    int dif = inicio - stop;
+    printf("Tempo de execução pipes: %ds\n", dif);
 
 
 
