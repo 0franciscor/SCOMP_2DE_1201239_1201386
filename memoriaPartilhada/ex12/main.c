@@ -11,16 +11,16 @@
 #define STR_SIZE 50
 #define NR_DISC 10
 
-struct aluno{
+typedef struct {
     int numero;
     int disciplinas[NR_DISC];
     int readyToRead;
     char nome[STR_SIZE];
-};
+} aluno;
 
 int main(){
 
-    struct aluno *student;
+    aluno *student;
     
     int fd = shm_open("/ex12", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
     if(fd < 0) perror("Error when creating shared memory file.\n");
@@ -47,39 +47,34 @@ int main(){
     }
 
     if(p == 0){
-
-        struct aluno *student2;
-
-        do{
-            int fd2 = shm_open("/ex12", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
-            if(fd2 < 0) perror("Error when creating shared memory file.\n");
-            if (ftruncate (fd2, 100) < 0) perror("Error when executing ftruncate() function.\n");
-            student2 = mmap(NULL, 100, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-
-            sleep(1);
-        } while(student2->readyToRead == 0);
-
-		int max = student2->disciplinas[0];
-		int min = student2->disciplinas[0];
+        
+		int max = student->disciplinas[0];
+		int min = student->disciplinas[0];
         float average = 0;
 
 		for(int i = 0; i < NR_DISC; i++) {
-			average += student2->disciplinas[i];
+			average += student->disciplinas[i];
 
-			if (student2->disciplinas[i] > max)
-				max = student2->disciplinas[i];
+			if (student->disciplinas[i] > max)
+				max = student->disciplinas[i];
 			
-            if (student2->disciplinas[i]< min)
-				min = student2->disciplinas[i];
+            if (student->disciplinas[i]< min)
+				min = student->disciplinas[i];
 		}
         average /= NR_DISC;
 
-        printf("Student: %s Minimum grade: %d Maximum grade: %d Average: %.2f\n", student2->nome, min, max, average);
+        printf("Student: %s Minimum grade: %d Maximum grade: %d Average: %.2f\n", student->nome, min, max, average);
 
         exit(0);
     }
 
     wait(NULL);
+
+    fd = munmap(student, sizeof(aluno));
+
+	fd = shm_unlink("/ex12");
+
+	close(fd);
 
     return 0;
 }
