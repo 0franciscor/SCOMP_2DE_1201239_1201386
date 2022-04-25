@@ -45,10 +45,11 @@ int main() {
 			int lastIndex = estrutura->array[0];
 			for(int i = 0; i < 10; i++){
 				if(i != 0 && lastIndex >= estrutura->array[i]){
-					printf("Os números não são sucessivamente superiores. Logo, a apresentação será terminada.\n");
+					printf("Os números não são sucessivamente superiores. O resto da sequência não será apresentada.\n");
 					break;
 				}
 				printf("Numero Escrito: %d\n", estrutura->array[i]);
+				lastIndex = estrutura->array[i];
 			}
 
 			estrutura->beenConsumed = 1;
