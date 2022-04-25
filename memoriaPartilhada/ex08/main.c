@@ -10,20 +10,24 @@
 
 #define NUM_ITERACTIONS 1000000
 
+typedef struct{
+    int num;
+} sharedStruct;
+
 int main(){
 
-    int *numAddr;
+    sharedStruct *numAddr;
     
     int fd = shm_open("/ex08", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
     if(fd < 0) perror("Error when creating shared memory file.\n");
     if (ftruncate (fd, sizeof(int)) < 0) perror("Error when executing ftruncate() function.\n");
     numAddr = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 
-    *numAddr = 10;
+    numAddr->num = 10;
 
     for(int i = 0; i < NUM_ITERACTIONS; i++){
-        (*numAddr)++;
-        (*numAddr)--;
+        (numAddr->num)++;
+        (numAddr->num)--;
     }
 
     pid_t p = fork();
@@ -34,16 +38,10 @@ int main(){
     }
 
     if(p == 0){
-        int *numAddr2;
-
-        int fd2 = shm_open("/ex08", O_RDWR, S_IRUSR|S_IWUSR);
-        if(fd2 < 0) perror("Error when creating shared memory file.\n");
-        if (ftruncate (fd2, sizeof(int)) < 0) perror("Error when executing ftruncate() function.\n");
-        numAddr2 = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED, fd2, 0);
-
+        
         for(int i = 0; i < NUM_ITERACTIONS; i++){
-            (*numAddr2)++;
-            (*numAddr2)--;
+            (numAddr->num)++;
+            (numAddr->num)--;
         }
 
         exit(0);
@@ -51,7 +49,13 @@ int main(){
 
     wait(NULL);
 
-    printf("Value: %d\n", *numAddr);
+    printf("Value: %d\n", numAddr->num);
+
+    fd = munmap(numAddr, sizeof(sharedStruct));
+
+	fd = shm_unlink("/ex08");
+
+	close(fd);
 
     return 0;
 }

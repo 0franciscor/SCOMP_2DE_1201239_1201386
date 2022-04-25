@@ -10,12 +10,17 @@
 
 #define ARRAY_SIZE 1000000
 
+typedef struct{
+    int array[ARRAY_SIZE]; 
+} sharedStruct;
+
 int main(){
     
     time_t start = time(NULL);
     
     int fd, size = sizeof(int) * ARRAY_SIZE;
-    int *arrayAddr; 
+
+    sharedStruct *arrayAddr;
     
     fd = shm_open("/ex06", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
     if(fd < 0) {
@@ -29,7 +34,7 @@ int main(){
     arrayAddr = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 
     for(int i = 0; i < ARRAY_SIZE; i++){
-        *(arrayAddr + i) = i;
+        arrayAddr->array[i] = i;
     }
 
     pid_t p = fork();
@@ -40,22 +45,9 @@ int main(){
     }
 
     if(p == 0){
-
-        int fd2 = shm_open("ex06", O_RDWR, S_IRUSR|S_IWUSR);
-        
-        if(fd < 0) {
-            perror("Error when creating shared memory file.\n");
-        }
-
-        if (ftruncate (fd, size) < 0) {
-            perror("Error when executing ftruncate() function.\n");
-        }
-
-        int *arrayAddr2;
-        arrayAddr2 = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd2, 0); 
         
         for(int i = 0; i < ARRAY_SIZE; i++) {
-            printf("Numero: %d\n", *(arrayAddr2 + i));
+            printf("Numero: %d\n", arrayAddr->array[i]);
         }
 
         exit(0);
@@ -66,7 +58,12 @@ int main(){
     time_t end = time(NULL);
     int total = end - start;
     printf("Tempo de execução: %ds\n", total);
-    
 
+    fd = munmap(arrayAddr, size);
+
+	fd = shm_unlink("/ex06");
+
+	close(fd);
+    
     return 0;
 }
