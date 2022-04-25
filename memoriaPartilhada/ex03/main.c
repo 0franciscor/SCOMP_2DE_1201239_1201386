@@ -12,21 +12,24 @@
 #define WORD_SIZE 20
 #define ARRAY_SIZE 100000
 
-struct info{
+typedef struct{
     int numero;
     char frase[WORD_SIZE];
-};
-
-typedef struct{
-    struct info arr[ARRAY_SIZE];
-} enviar;
+}info;
 
 int main(int argc, char* argv[]) {
 
-    int size = sizeof(struct info); 
-	enviar *infoPartilhada;
-
     time_t start = time(NULL);
+
+    int size = sizeof(info); 
+	info *infoPartilhada;
+
+    info arr [ARRAY_SIZE];
+
+    for(int i = 0; i < ARRAY_SIZE; i++){
+        arr[i].numero = i;
+		strcpy(arr[i].frase,"ISEP - SCOMP 2020");
+    }
 
 	int fd = shm_open("/ex3",O_CREAT|O_EXCL|O_RDWR,S_IRUSR|S_IWUSR); 
 
@@ -41,14 +44,7 @@ int main(int argc, char* argv[]) {
 		return 2;
 	}
 
-    infoPartilhada = (enviar*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0);
-
-    for(int i = 0; i < ARRAY_SIZE; i++){
-        struct info informacao;
-        informacao.numero = i;
-        strcpy(informacao.frase, "ISEP-SCOMP 2020");
-        infoPartilhada->arr[i] = informacao;
-    }
+    infoPartilhada = (info*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0);
 
     pid_t pid = fork();
 
@@ -58,8 +54,10 @@ int main(int argc, char* argv[]) {
 
     } else if (pid == 0){
 
-        enviar *infoRecebida;
-        infoRecebida = (enviar*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0);
+        for (int i = 0; i < ARRAY_SIZE ; i++) {
+            (infoPartilhada+i)->numero = arr[i].numero;
+            strcpy((infoPartilhada+i)->frase,arr[i].frase);
+        }
 
         if (munmap(infoPartilhada, size) < 0) {
             printf("Error at munmap()!\n");
@@ -78,7 +76,6 @@ int main(int argc, char* argv[]) {
         }
 
         exit(1);
-        
     }
 
     wait(NULL);    
@@ -113,23 +110,34 @@ int main(int argc, char* argv[]) {
         perror("Fork Falhou");
         return 3;
 
-    } else if (p == 0){
+    } else if (p > 0){
+
+        close(pp[0]);
+
+        for(int i=0; i<ARRAY_SIZE; i++){
+			info temp = arr[i];
+			write(pp[1], &temp, sizeof(temp));
+		}
 
         close(pp[1]);
 
-        enviar *infoRecebida;
+        wait(NULL);
 
-        read(pp[0], &infoRecebida, sizeof(infoRecebida));
+        time_t stop = time(NULL);
+        int dif = inicio - stop;
+        printf("Tempo de execução pipes: %ds\n", dif);
+        
+    } else {
+        close(pp[1]);
+		for(int i=0; i<ARRAY_SIZE; i++){
+			info aux;
+			read(pp[0], &aux, sizeof(aux));
+		}
+			
+		close(pp[0]);
 
-        close(pp[0]);
         exit(1);
     }
-
-    time_t stop = time(NULL);
-    int dif = inicio - stop;
-    printf("Tempo de execução pipes: %ds\n", dif);
-
-
 
     return 0;
 }
