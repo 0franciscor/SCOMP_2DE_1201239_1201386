@@ -37,12 +37,9 @@ int main(){
 
     // ########################### SHARED MEMORY ################################
 
-    datarecord database[100];
-
     int fd, size = 8;
 
     datarecord *memAddress;
-    memAddress = database;
     
     fd = shm_open("/ex10", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
 
@@ -54,17 +51,13 @@ int main(){
 
     // ###########################################################################
 
-    sem_t *sem[3];
-    char name[3][10];
+    sem_t sem;
 
-
-    for(int i = 0; i < 3; i++){
-        sprintf(name[i], "10.%d", i);
-        if ((sem[i] = sem_open(name[i], O_CREAT, 0644, 1)) == SEM_FAILED) {
-            perror("Error in sem_open function\n");
-            exit(1);
-        }
+    if ((sem = sem_open("10", O_CREAT, 0644, 1)) == SEM_FAILED) {
+        perror("Error in sem_open function\n");
+        exit(1);
     }
+    
 
     int option = -1;
     pid_t p;
@@ -160,11 +153,9 @@ int main(){
     fd = munmap(memAddress, size);
 	fd = shm_unlink("/ex10");
 	close(fd);
-
-    for(int i = 0; i < 3; i++){
-        sem_close(sem[i]);
-        sem_unlink(name[i]);
-    }
-
+    
+    sem_close(sem);
+    sem_unlink("10");
+    
     return 0;
 }
