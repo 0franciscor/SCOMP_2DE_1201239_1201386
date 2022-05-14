@@ -61,6 +61,7 @@ int main(){
 
             sem_post(sem[i]);
 
+            sem_close(sem[i]);
             sem_unlink(name[i]);
             
             exit(0);

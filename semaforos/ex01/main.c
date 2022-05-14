@@ -70,6 +70,8 @@ int main(){
         wait(NULL);
     }
 
+    sem_close(semRead);
+    sem_close(semWrite);
     sem_unlink("/1r");
     sem_unlink("/1w");
 
