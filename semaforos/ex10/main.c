@@ -37,7 +37,7 @@ int main(){
 
     // ########################### SHARED MEMORY ################################
 
-    int fd, size = 8;
+    int fd, size = sizeof(datarecord) * 100;
 
     datarecord *memAddress;
     
@@ -51,13 +51,12 @@ int main(){
 
     // ###########################################################################
 
-    sem_t sem;
+    sem_t *sem;
 
     if ((sem = sem_open("10", O_CREAT, 0644, 1)) == SEM_FAILED) {
         perror("Error in sem_open function\n");
         exit(1);
     }
-    
 
     int option = -1;
     pid_t p;
@@ -70,7 +69,7 @@ int main(){
             switch(option){
                 
                 case 1:{
-                    sem_wait(sem[0]);
+                    sem_wait(sem);
                     printf("Por favor insira o número desejado: ") ;
                     int numDesejado;
                     scanf("%d", &numDesejado);
@@ -88,12 +87,13 @@ int main(){
                     }
 
                     if(i == 0) printf("Não há nenhuma estrutura disponível.\n");
-                    sem_post(sem[0]);
+                    sem_post(sem);
+                    
                     break;
                 }
 
                 case 2:{
-                    sem_wait(sem[1]);
+                    sem_wait(sem);
                     printf("Número: ") ;
                     int num;
                     scanf("%d", &num);
@@ -106,7 +106,6 @@ int main(){
                     char address[50];
                     scanf("%s", address);
 
-
                     datarecord record; 
                     record.number = num;
                     strcpy(record.name, nome);
@@ -114,26 +113,32 @@ int main(){
                     record.filled = 1;
 
                     int i = 0;
-                    while((memAddress + i)->filled != 0) i++;
+                    datarecord auxRecord = *(memAddress + i);
+                    while(auxRecord.filled != 0){
+                        i++;
+                        auxRecord = *(memAddress + i);
+                    } 
                     *(memAddress + i) = record;
-                    sem_post(sem[1]);
+                     
+                    sem_post(sem);
+
                     break;
                 }
 
                 case 3:{
-                    sem_wait(sem[2]);
-                    datarecord record = *memAddress;
+                    sem_wait(sem);
+                    
                     int i = 0;
+                    datarecord record = *memAddress;
                     while(record.filled != 0){
                         i++;
-                        printf("Name: %s\nAddress: %s\nNumber: %d",
-                        record.name, record.address, record.number);
+                        printf("Name: %s\nAddress: %s\nNumber: %d", record.name, record.address, record.number);
 
                         record = *(memAddress + i);
                     }
 
                     if(i == 0) printf("Não há nenhuma estrutura disponível.\n");
-                    sem_post(sem[2]);
+                    sem_post(sem);
                     break;
                 }
                 
