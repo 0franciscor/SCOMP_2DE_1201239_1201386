@@ -14,7 +14,7 @@ int main(){
 
     sem_t *semWriter;
  
-    if ((semWriter = sem_open("/sema5", O_CREAT | O_EXCL, 0644, 0)) == SEM_FAILED ){
+    if ((semWriter = sem_open("/ex05", O_CREAT | O_EXCL, 0644, 0)) == SEM_FAILED ){
         perror("Error in sem_open()");
         exit(1);
     }
@@ -23,22 +23,27 @@ int main(){
 
     if(pid == 0){		
 		printf("I'm the child!\n");
-		sem_post(semWriter);
+		if (sem_post(semWriter) == -1) {
+            perror("Error at sem_post().");
+            exit(2);
+        }
         exit(0);
 	}else if (pid > 0) {	
-		sem_wait(semWriter);
+		if (sem_wait(semWriter) == -1) {
+            perror("Error at sem_wait().");
+            exit(3);
+        }
 		printf("I'm the father!\n");
-        sem_post(semWriter);
     } else {
         perror("Fork Falhou");
-        exit(2);
+        exit(4);
     }
 
     wait(NULL);
 
-    if (sem_unlink("/sema5") == -1 ){
+    if (sem_unlink("/ex05") == -1 ){
         perror("Error in sem_unlink()");
-        exit(4);
+        exit(5);
     }
 
     return 0;
