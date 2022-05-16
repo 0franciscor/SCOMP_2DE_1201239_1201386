@@ -1,7 +1,7 @@
 main: main.o
 	gcc -Wall -o main main.c -lpthread -lrt
 
-main.o: main.c asm.h
+main.o: main.c
 	gcc -Wall -g -c main.c
 
 run: main
