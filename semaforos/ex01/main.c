@@ -15,65 +15,61 @@ int main(){
 
     sem_t *semRead, *semWrite;
 
-    if ((semRead = sem_open("/1r", O_CREAT | O_EXCL, 0644, 1)) == SEM_FAILED){
+    if ((semRead = sem_open("1r", O_CREAT | O_EXCL, 0644, 1)) == SEM_FAILED){
         perror("Error in sem_openR\n");
         exit(1);
     }
 
-    if ((semWrite = sem_open("/1w", O_CREAT | O_EXCL, 0644, 1)) == SEM_FAILED){
+    if ((semWrite = sem_open("1w", O_CREAT | O_EXCL, 0644, 1)) == SEM_FAILED){
         perror("Error in sem_openW\n");
         exit(1);
     }
     
-    FILE *file = fopen("input.txt","wb");
+    FILE *input = fopen("input.txt","w"), *output = fopen("output.txt","w");
 
-    for (int i = 0; i < 1600; i++){
-        fprintf(file, "%d\n", (rand() % 100));
+    for (int i = 0; i < 200; i++){
+        fprintf(input, "%d\n", (rand() % 100));
     }
-    fclose(file);
 
     pid_t p;
     int array[200];
+
+    fclose(input); fclose(output);
 
     for (int i = 0; i < 8; i++){
         p = fork();
 
         if (p == 0){
-            
-            FILE *input = fopen("input.txt", "r"), *output = fopen("output.txt", "a");
-            int start = i * 200, end = start + 200;
-            
+            input = fopen("input.txt", "r");
+            output = fopen("output.txt", "a");
             sem_wait(semRead);
-            int index = 0;
-            for (int i = start; i < end; i++){
-                fscanf(input, "%d\n", &array[index]);            
-                index++;
+
+            for (int i = 0; i < 200; i++){
+                fscanf(input, "%d\n", &array[i]);
             }
             sem_post(semRead);
             
             sem_wait(semWrite);
-            index = 0;
-            for (int i = start; i < end; i++){
-                fprintf(output, "%d\n", array[index]);
-                index++;
+            fprintf(output, "Process ID: %d\n", getpid());
+            for (int i = 0; i < 200; i++){
+                fprintf(output, "%d\n", array[i]);
             } 
             sem_post(semWrite);
-
             fclose(input);
             fclose(output);
-            
+
             exit(0);
         }
     }
 
     for (int i = 0; i < 8; i++){
         wait(NULL);
-    }
+    }    
 
     sem_close(semRead);
     sem_close(semWrite);
-    sem_unlink("/1r");
-    sem_unlink("/1w");
+    sem_unlink("1r");
+    sem_unlink("1w");
 
     return 0;
 }
