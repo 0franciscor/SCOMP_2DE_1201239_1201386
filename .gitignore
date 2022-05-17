@@ -20,7 +20,7 @@ dist/
 *.jar
 
 # VsCode IDE
-.vscode/
+.vscode/*
 
 # Maven
 target/
