@@ -1,11 +1,8 @@
-main: main.o
-	gcc -Wall -o main main.c -lpthread -lrt
-
-main.o: main.c asm.h
-	gcc -Wall -g -c main.c
+main: main.c
+	gcc -g -Wall main.c -o main.o -lrt -lpthread
 
 run: main
-	./main &
+	./main.o
 
 clean:
 	rm *.o main
