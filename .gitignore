@@ -74,3 +74,4 @@ geany_run_script.sh
 
 #Ignore object files
 *.o
+.vscode/targets.log
