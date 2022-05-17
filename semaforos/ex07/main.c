@@ -54,32 +54,62 @@ int main(){
 			if(i == 0){				
 				printf("Sistemas ");
 	            fflush(stdout);
-                sem_post(sem2);
-                sem_wait(sem1);
+                if (sem_post(sem2) == -1) {
+                    perror("Error at sem_post().");
+                    exit(2);
+                }
+                if (sem_wait(sem1) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
 	            printf("a ");
 	            fflush(stdout);
-                sem_post(sem2);
+                if (sem_post(sem2) == -1) {
+                    perror("Error at sem_post().");
+                    exit(2);
+                }
 				
 				exit(0);
 			}
 			if(i == 1){				
-				sem_wait(sem2);
+				if (sem_wait(sem2) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
                 printf("de ");
 	            fflush(stdout);
-                sem_post(sem3);
-                sem_wait(sem2);
+                if (sem_post(sem3) == -1) {
+                    perror("Error at sem_post().");
+                    exit(2);
+                }
+                if (sem_wait(sem2) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
 		        printf("melhor ");
 		        fflush(stdout);
-                sem_post(sem3);
+                if (sem_post(sem3) == -1) {
+                    perror("Error at sem_post().");
+                    exit(2);
+                }
 
                 exit(0);
 			}
 			if(i == 2){				
-				sem_wait(sem3);
+				if (sem_wait(sem3) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
                 printf("Computadores ");
 	            fflush(stdout);
-                sem_post(sem1);
-                sem_wait(sem3);
+                if (sem_post(sem1) == -1) {
+                    perror("Error at sem_post().");
+                    exit(2);
+                }
+                if (sem_wait(sem3) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
 		        printf("disciplina! ");
 		        fflush(stdout);
 
@@ -88,9 +118,20 @@ int main(){
 		}
 	}
 
-    sem_unlink("/s1");
-	sem_unlink("/s2");
-	sem_unlink("/s3");
+    if (sem_unlink("/s1") == -1 ){
+        perror("Error in sem_unlink()");
+        exit(5);
+    }
+
+    if (sem_unlink("/s2") == -1 ){
+        perror("Error in sem_unlink()");
+        exit(5);
+    }
+
+    if (sem_unlink("/s3") == -1 ){
+        perror("Error in sem_unlink()");
+        exit(5);
+    }
 
     return 0;
 }
