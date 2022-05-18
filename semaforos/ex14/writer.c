@@ -1,0 +1,46 @@
+#include <semaphore.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <wait.h>
+#include <string.h>
+
+int main(){
+
+    // ########################### SHARED MEMORY ################################
+
+    int fd, size = sizeof(char*) * 100;
+
+    char *string;
+    
+    fd = shm_open("ex14", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
+
+    if(fd < 0) perror("Error when creating shared memory file.\n");
+
+    if (ftruncate (fd, size) < 0) perror("Error when executing ftruncate() function.\n");
+    
+    string = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+
+    // ###########################################################################
+
+    sem_t *sem;
+
+    if ((sem = sem_open("14", O_CREAT, 0644, 0)) == SEM_FAILED) {
+        perror("Error in sem_open function\n");
+        exit(1);
+    }
+
+    sem_wait(sem);
+    
+    sleep(2);
+    sprintf(string, "The Writer with %d PID wrote this message.", getpid());
+
+    sem_post(sem);
+
+    return 0;
+}
