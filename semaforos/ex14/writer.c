@@ -10,13 +10,17 @@
 #include <wait.h>
 #include <string.h>
 
+typedef struct{
+    char frase[100];
+} sharedSentence;
+
 int main(){
 
     // ########################### SHARED MEMORY ################################
 
-    int fd, size = sizeof(char*) * 100;
+    int fd, size = sizeof(sharedSentence);
 
-    char *string;
+    sharedSentence *string;
     
     fd = shm_open("ex14", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
 
@@ -28,19 +32,31 @@ int main(){
 
     // ###########################################################################
 
-    sem_t *sem;
+    sem_t *semWriter, *semReader;
 
-    if ((sem = sem_open("14", O_CREAT, 0644, 0)) == SEM_FAILED) {
+    if((semWriter = sem_open("14w", O_CREAT, 0644, 1)) == SEM_FAILED) {
         perror("Error in sem_open function\n");
         exit(1);
     }
 
-    sem_wait(sem);
-    
-    sleep(2);
-    sprintf(string, "The Writer with %d PID wrote this message.", getpid());
+    if((semReader = sem_open("14r", O_CREAT, 0644, 1)) == SEM_FAILED){
+        perror("Error in sem_open function\n");
+        exit(1);
+    }
 
-    sem_post(sem);
+    sem_wait(semWriter);
+    sem_wait(semReader);
+
+    sleep(5);
+
+    sharedSentence writtenString;
+
+    sprintf(writtenString.frase, "The Writer with %d PID wrote this message.", getpid());
+
+    *string = writtenString;
+
+    sem_post(semWriter);
+    sem_post(semReader);
 
     return 0;
 }

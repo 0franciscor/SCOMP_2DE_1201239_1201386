@@ -30,7 +30,7 @@ int main(){
 
     sem_t *sem;
 
-    if ((sem = sem_open("14", O_CREAT, 0644, 0)) == SEM_FAILED) {
+    if ((sem = sem_open("14r", O_CREAT, 0644, 0)) == SEM_FAILED) {
         perror("Error in sem_open function\n");
         exit(1);
     }
