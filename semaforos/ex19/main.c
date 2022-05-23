@@ -26,16 +26,29 @@ typedef struct {
     int measurement[QUANT_SENSORES * QUANT_VALORES];
     int numSensorsAlarmState;
     int indexValorAEscrever[QUANT_SENSORES];
+    int sensorQueEscreveu;
 } info;
 
 int main(){
 
-    sem_t *canWrite;
+    sem_t *canWrite, *canRead, *sincronizacao;
 
     if ((canWrite = sem_open("/swrite", O_CREAT | O_EXCL, 0644, 1)) == SEM_FAILED) {
 		perror("Error in sem_open()");
         exit(1);
 	}
+
+    if ((canRead = sem_open("/sread", O_CREAT | O_EXCL, 0644, 0)) == SEM_FAILED) {
+		perror("Error in sem_open()");
+        exit(1);
+	}
+
+    if ((sincronizacao = sem_open("/sincronizacao", O_CREAT | O_EXCL, 0644, 0)) == SEM_FAILED) {
+		perror("Error in sem_open()");
+        exit(1);
+	}
+	
+	
 	
 	int size = sizeof(info); 
 	info *infoPartilhada;
@@ -93,13 +106,30 @@ int main(){
                     if(currentMeasurement < LIMITE && previousMeasurement < LIMITE) {
                         infoPartilhada->numSensorsAlarmState--;
                     }
-                } 
+                } else {
+                    if(currentMeasurement < LIMITE){
+                        infoPartilhada->numSensorsAlarmState--;
+                    }
+
+                }
                 
                 if(currentMeasurement > LIMITE) {
                     infoPartilhada->numSensorsAlarmState++;
                 }
 
                 infoPartilhada->indexValorAEscrever[i]++;
+
+                infoPartilhada->sensorQueEscreveu = i;
+
+                if (sem_post(canRead) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
+
+                if (sem_wait(sincronizacao) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
 
                 if (sem_post(canWrite) == -1) {
                     perror("Error at sem_wait().");
@@ -116,18 +146,29 @@ int main(){
 
     }
 
-    for (int i = 0; i < QUANT_SENSORES; i++) {
-        wait(NULL);
-    }
-
     // Controller
-
-    for (int i = 0; i < QUANT_SENSORES; i++) {
-        for ( int j = 0; j < QUANT_VALORES; j++){
-                printf(">>Sensor %d Measurement %d: %d\n", i,j, infoPartilhada->measurement[i*QUANT_VALORES + j]);
+    for (int i = 0; i < QUANT_SENSORES * QUANT_VALORES; i++) {
+        if (sem_wait(canRead) == -1) {
+            perror("Error at sem_wait().");
+            exit(3);
         }
+
+        int sensor = infoPartilhada->sensorQueEscreveu;
+        int aux =  infoPartilhada->indexValorAEscrever[sensor] - 1;
+
+        printf("Sensor %d Measurement %d: %d\n", sensor,aux, infoPartilhada->measurement[sensor*QUANT_VALORES + aux]);
+        printf("Quantidade de sensores em estado de alarme: %d\n",infoPartilhada->numSensorsAlarmState);
+
+        if (sem_post(sincronizacao) == -1) {
+            perror("Error at sem_wait().");
+            exit(3);
+        }
+        
     }
 
+    for (int i = 0; i < QUANT_SENSORES; i++) {
+        wait(null);
+    }
 
     if (munmap((void *)infoPartilhada, size) < 0) {
         printf("Error at munmap()!\n");
@@ -146,6 +187,16 @@ int main(){
     }
 
     if (sem_unlink("/swrite") == -1 ){
+        perror("Error in sem_unlink()");
+        exit(5);
+    }
+
+    if (sem_unlink("/sread") == -1 ){
+        perror("Error in sem_unlink()");
+        exit(5);
+    }
+
+     if (sem_unlink("/sincronizacao") == -1 ){
         perror("Error in sem_unlink()");
         exit(5);
     }
