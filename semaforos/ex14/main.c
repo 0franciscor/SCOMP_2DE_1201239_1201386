@@ -37,12 +37,12 @@ int main(){
 
     sem_t *semWriter, *semReader;
 
-    if((semWriter = sem_open("14w", 1)) == SEM_FAILED) {
+    if((semWriter = sem_open("14w", O_CREAT, 0644, 1)) == SEM_FAILED) {
         perror("Error in sem_open function\n");
         exit(1);
     }
 
-    if((semReader = sem_open("14r", 1)) == SEM_FAILED){
+    if((semReader = sem_open("14r", O_CREAT, 0644, 1)) == SEM_FAILED){
         perror("Error in sem_open function\n");
         exit(1);
     }
@@ -50,14 +50,10 @@ int main(){
     sem_wait(semWriter);
     sem_wait(semReader);
 
-    time_t t;   // not a primitive datatype
-    time(&t);
-
-    sprintf(string->frase, "The Writer with %d PID wrote this message. Time is %s", getpid(), ctime(&t));
-    string->numWriters++;
-
-    printf("The current number of Writers is %d\n", string->numWriters);
-    printf("The current number of Readers is %d\n", string->numReaders);
+    sharedSentence writtenString;
+    writtenString.numReaders = 0;
+    writtenString.numWriters = 0;
+    *string = writtenString;
 
     sem_post(semWriter);
     sem_post(semReader);
