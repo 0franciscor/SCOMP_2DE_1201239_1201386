@@ -50,7 +50,7 @@ int main(){
     sem_wait(semWriter);
     sem_wait(semReader);
 
-    time_t t;   // not a primitive datatype
+    time_t t;
     time(&t);
 
     sprintf(string->frase, "The Writer with %d PID wrote this message. Time is %s", getpid(), ctime(&t));
