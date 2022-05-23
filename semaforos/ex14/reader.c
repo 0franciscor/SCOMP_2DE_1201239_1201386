@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 #include <wait.h>
 #include <string.h>
-#include <time.h>
 
 typedef struct{
     char frase[100];
@@ -35,28 +34,27 @@ int main(){
 
     // ###########################################################################
 
-    sem_t *semWriter, *semReader;
+    sem_t *sem;
 
-    if((semWriter = sem_open("14w", O_CREAT, 0644, 1)) == SEM_FAILED) {
+    if ((sem = sem_open("14r", 0)) == SEM_FAILED) {
         perror("Error in sem_open function\n");
         exit(1);
     }
 
-    if((semReader = sem_open("14r", O_CREAT, 0644, 1)) == SEM_FAILED){
-        perror("Error in sem_open function\n");
-        exit(1);
+    printf("Reader With ID: %d\n", getpid());
+
+    if(string->numWriters == 0){
+        printf("No writers have yet written on the Shared Memory Area. Exiting.\n");
+        return 0;
     }
+       
+    sleep(1);
 
-    sem_wait(semWriter);
-    sem_wait(semReader);
+    sem_wait(sem);
 
-    sharedSentence writtenString;
-    writtenString.numReaders = 0;
-    writtenString.numWriters = 0;
-    *string = writtenString;
-
-    sem_post(semWriter);
-    sem_post(semReader);
-
+    printf("The content of the String is: %s\n", string->frase);
+    
+    sem_post(sem);
+    
     return 0;
 }
