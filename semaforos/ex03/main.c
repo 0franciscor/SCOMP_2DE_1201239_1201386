@@ -1,3 +1,34 @@
+/********************************************************************************
+
+Pseudo-código:
+	criação e iniciaização da memória partilhada 
+   
+    criação de dois semáforos: um para exclusão mútua e outro com a capacidade máxima
+	
+	for every process {
+        fork()
+        verificar se pode escrever
+        while(sem_trywait(capacity) == 0) { (caso a capacidade máxima já tenha sido atingida não bloqueia e termina)
+            se não for a primeira vez {
+                verificar se pode escrever
+            }
+            escrever na memória partilhada
+            passa para a posição seguinte
+            desbloquear o semáforo de exclusão mútua
+            sleep
+        }
+        exits
+        desbloquear o semáforo de exclusão mútua
+    }
+
+    pai espera que todos os filhos terminem a execução
+    pai imprime as informações 
+	
+	eliminação dos semáforos e da área de memória partilhada
+
+*********************************************************************************/
+
+
 #include <errno.h>
 #include <fcntl.h>
 #include <semaphore.h>

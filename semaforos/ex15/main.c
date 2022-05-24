@@ -50,14 +50,14 @@ int main(int argc, char *argv[]) {
 		}
 
 		if(pid == 0) {
-            
+
         }
 
     }
 
-
-
-
+    for (i = 0; i < QUANT_PROCESSOS; i++){
+		wait(NULL);
+	}
 
     if (sem_unlink("/show") == -1 ){
         perror("Error in sem_unlink()");
