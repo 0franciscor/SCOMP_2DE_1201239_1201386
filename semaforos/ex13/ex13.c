@@ -1,7 +1,41 @@
 /********************************************************************************
 
-Padrão: Produtor/Consumidor
-Exemplo: Farmácia
+Padrão: Problema do Produtor/Consumidor ( Exempo Farmácia )
+
+Pseudo-Código:
+	cria 3 semáforos
+	criação e iniciaização da memória partilhada 
+	inicializa o buffer circular
+    cria os filhos 
+
+    if(producer) {
+        for each valor que vai escrever {
+            verifica se pode escrever
+            espera pelo semáforo de mútua exclusão
+            guarda a head do buffer
+            gera o valor
+            liberta o semáforo de mútua exclusão
+            liberta o semáforo de leitura
+        }
+        exit
+
+    } else {
+        for each valor a ser lido{
+            verifica se pode ler
+            espera pelo semáforo de mútua exclusão
+            guarda a tail
+        
+            imprime informação
+
+            liberta o semáforo de mútua exclusão
+            liberta o semáforo de escrita
+        }
+    }
+
+    pai espera que os filhos esperem de executar
+
+
+	elimina os semáforos e a área de memória partilhada
 
 *********************************************************************************/
 
