@@ -25,11 +25,11 @@ int main(){
     int size = sizeof(info); 
     info *infoPartilhada;
 
-    int fd = shm_open("/ex3",O_CREAT|O_EXCL|O_RDWR,S_IRUSR|S_IWUSR); 
+    int fd = shm_open("/EXER03",O_CREAT|O_EXCL|O_RDWR,S_IRUSR|S_IWUSR); 
 
     if(fd == -1){
 		perror("Creating or opening shared memory failure");
-		shm_unlink("/ex3");
+		shm_unlink("/EXER03");
 		exit(1);
 	}
 
@@ -40,29 +40,95 @@ int main(){
 
     infoPartilhada = (info*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0);
 
-    sem_t *semWrite;
+    infoPartilhada->quant_info = 0;
 
-    if ((semWrite = sem_open("/sem3", O_CREAT, 0644, 1)) == SEM_FAILED ){
+    sem_t *semWrite, *capacidade;
+
+    if ((semWrite = sem_open("/cWrite3", O_CREAT, 0644, 1)) == SEM_FAILED ){
         perror("Error in sem_open()");
         exit(3);
     }
 
+    if ((capacidade = sem_open("/capacidade", O_CREAT, 0644, 50)) == SEM_FAILED ){
+        perror("Error in sem_open()");
+        exit(3);
+    }
+
+    for(int i = 0; i < QUANT_PROCESSOS; i++){
+		
+		pid_t pid = fork();
+
+        if(pid == -1){
+			perror("Fork Falhou");
+            exit(2);
+		}
+
+        if( pid == 0){
+
+            int temp = 1;
+
+            while (temp == 1){
+
+                if (sem_wait(semWrite) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
+
+                if(infoPartilhada->quant_info == 50){
+                    temp = 0;
+                } else {
+                    char aux[80];
+	                sprintf(aux,"I'm the Father - with PID %ld\n",(long)getpid());
+                    strcpy(infoPartilhada->data[infoPartilhada->quant_info],aux);
+                    infoPartilhada->quant_info++;
+                }    
+
+                if (sem_post(semWrite) == -1) {
+                    perror("Error at sem_wait().");
+                    exit(3);
+                }
+
+                int n = (rand() % 5) + 1;
+                sleep(n);
+
+            }
+
+            exit(0);
+        
+        }
+
+    }
+
+    for(int i = 0; i < QUANT_PROCESSOS; i++){
+        wait(NULL);
+    }
+
+    for(int i = 0; i < MAX_STRINGS; i++){
+        printf("%d: %s\n",i,infoPartilhada->data[i]);
+    }
+
+    if (munmap((void *)infoPartilhada, size) < 0) {
+        printf("Error at munmap()!\n");
+        return 3;
+    } 
+
+    if (close(fd) < 0) {
+        printf("Error at close()!\n");
+        return 4;
+    }
 
 
+    if (shm_unlink("/EXER03") < 0) {
+        printf("Error at shm_unlink()!\n");
+        exit(1);
+    }
 
+    if (sem_unlink("/cWrite3") == -1 ){
+        perror("Error in sem_unlink()");
+        exit(4);
+    }
 
-
-
-
-
-
-
-
-
-
-
-    
-    if (sem_unlink("/sem3") == -1 ){
+    if (sem_unlink("/capacidade") == -1 ){
         perror("Error in sem_unlink()");
         exit(4);
     }
