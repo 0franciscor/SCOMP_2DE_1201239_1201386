@@ -36,7 +36,7 @@ int main(){
 
     // ###########################################################################
 
-    sem_t *semP1, *semP2;
+    sem_t *semP1, *semP2, *semP3;
 
     if ((semP1 = sem_open("p1", O_CREAT, 0644, 0)) == SEM_FAILED) {
         perror("Error in sem_open function\n");
@@ -48,64 +48,74 @@ int main(){
         exit(1);
     }
 
-    srand(time(0));
-
-    estrutura initialStruct;
-
-    for(int i = 0; i < VETOR_SIZE; i++){
-        initialStruct.vetor[i] = (rand() % (5000 - 1 + 1)) + 1;
+    if ((semP3 = sem_open("p3", O_CREAT, 0644, 1)) == SEM_FAILED) {
+        perror("Error in sem_open function\n");
+        exit(1);
     }
 
-    *sharedStruct = initialStruct;
+    srand(time(0));
+
+    for(int i = 0; i < VETOR_SIZE; i++){
+        sharedStruct->vetor[i] = (rand() % (5000 - 1 + 1)) + 1;
+    }
+
+    for(int i = 0; i < (VETOR_SIZE/2); i++){
+        sharedStruct->vetorFinal[i] = 0;
+    }
 
     pid_t p1 = fork();
     if(p1 == 0){
-        
-        int i = 0, soma;
-        for(; i < VETOR_SIZE; i+=3){
+    
+        int index = 0;
+        for(int i = 0; i < VETOR_SIZE; i+=4){
             sem_post(semP2);
+            sem_trywait(semP3);
 
-            soma = sharedStruct->vetor[i] + sharedStruct->vetor[i + 1];
-            sharedStruct->vetorFinal[i] = soma;
+            int multiplicacao = sharedStruct->vetor[i] * sharedStruct->vetor[i+1];
+            sharedStruct->vetorFinal[index] = multiplicacao;
 
+            index += 2;
             sem_wait(semP1);
-        }
+            sem_post(semP3);
+        }     
+        
         exit(0);
     }
 
     pid_t p2 = fork();
     if(p2 == 0){
-        
-        int i = 1, soma;
-        for(; i < VETOR_SIZE; i+=3){
+
+        int index = 1;
+        for(int i = 2; i < VETOR_SIZE; i+=4){
             sem_post(semP1);
+            sem_trywait(semP3);
 
-            soma = sharedStruct->vetor[i] + sharedStruct->vetor[i + 1];
-            sharedStruct->vetorFinal[i] = soma;
-
+            int multiplicacao = sharedStruct->vetor[i] * sharedStruct->vetor[i+1];
+            sharedStruct->vetorFinal[index] = multiplicacao;
+            
+            index += 2;
             sem_wait(semP2);
-        }
+            sem_post(semP3);
+        } 
+
         exit(0);
     }
 
     
     pid_t p3 = fork();
     if(p3 == 0){
-        int index = 0, greatest = 0;
-        while(index < (VETOR_SIZE/2)){
-            sem_trywait(semP1);
-            sem_trywait(semP2);
-            fflush(stdout);
-            if(sharedStruct->vetorFinal[index] > greatest){
-                greatest = sharedStruct->vetorFinal[index];
+        int greatest = 0;
+
+        for(int i = 0; i < (VETOR_SIZE/2); i++){
+            sem_wait(semP3);
+            
+            int numero = sharedStruct->vetorFinal[i]; //Com print, a funcao funciona
+            if(numero > greatest){
+                greatest = numero;
                 printf("There is a new greatest number: %d\n", greatest);
-                fflush(stdout);
-            }  
+            }
 
-            sem_post(semP1);
-            sem_post(semP2);
-
-            index++;
+            sem_post(semP3);
         }
         exit(0);
     }
@@ -140,6 +150,11 @@ int main(){
         exit(1);
     }
 
+    if(sem_close(semP3) == -1){
+        printf("There was an error when using the sem_close() function.\n");
+        exit(1);
+    }
+
     if (sem_unlink("p1") == -1){
         perror("Error in sem_unlink()");
         exit(1);
@@ -149,7 +164,11 @@ int main(){
         perror("Error in sem_unlink()");
         exit(1);
     }
-    
 
+    if (sem_unlink("p3") == -1){
+        perror("Error in sem_unlink()");
+        exit(1);
+    }
+    
     return 0;
 }
