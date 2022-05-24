@@ -97,6 +97,11 @@ int main(int argc, char *argv[]) {
 				
 				count++;
 			} 
+
+            if (sem_post(semWrite) == -1) {
+                perror("Error at sem_post().");
+                exit(3);
+            }
 			
 			exit(0);
 			
