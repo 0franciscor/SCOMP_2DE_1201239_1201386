@@ -127,7 +127,7 @@ int main(){
 	}
 
 	//parent opens and closes the shows
-	for(interactions = 0; interactions < NUMBER_OF_SHOWS; interactions++){
+	for(interactions = 0; interactions < QUANT_SHOWS; interactions++){
 		printf("========= Abriu o show por %d segundo(s).  =========\n", SHOW_DURATION);
 		//open the show
 		shared_data -> show = SHOW_OPEN;

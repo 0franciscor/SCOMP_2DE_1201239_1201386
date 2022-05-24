@@ -1,8 +1,8 @@
-main: main.c
-	gcc -g -Wall main.c -o main.o -lrt -lpthread
+ex13: ex13.c
+	gcc -g -Wall ex13.c -o ex13.o -lrt -lpthread
 
-run: main
-	./main.o
+run: ex13
+	./ex13.o
 
 clean:
-	rm *.o main
+	rm *.o ex13
