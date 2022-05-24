@@ -1,3 +1,29 @@
+/********************************************************************************
+
+Pseudo-Código:
+    criação de dois semáforos para sincronização de processos 
+    criação de dois filhos 
+    
+    if(child 1) {
+        buy_chips() 
+        espera que tenha bebida e comida 
+        eat_and_drink()
+        exit
+    }
+
+    if(child 2) {
+        buy_beer()
+        espera que tenha bebida e comida 
+        eat_and_drink()
+        exit
+    }
+
+    pai espera que os filhos terminem a execução
+
+	eliminação dos semáforos 
+
+*********************************************************************************/
+
 #include <errno.h>
 #include <fcntl.h>
 #include <semaphore.h>
@@ -15,20 +41,6 @@
 #define QUANT_PROCESSOS 2
 #define SEM_CHIPS 0
 #define SEM_BEER 1
-
-void down(sem_t *sem) {
-	if(sem_wait(sem) == -1) {
-		perror("Error at sem_wait()!");
-		exit(EXIT_FAILURE);
-	}
-}
-
-void up(sem_t *sem) {
-	if(sem_post(sem) == -1) {
-		perror("Error at sem_post()!");
-		exit(EXIT_FAILURE);
-	}
-}
 
 void buy_chips(char *processName, sem_t *semaforo) {
     printf("%s: buy_chips()\n", processName);

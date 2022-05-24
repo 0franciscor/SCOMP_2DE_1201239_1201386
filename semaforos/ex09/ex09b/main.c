@@ -1,3 +1,29 @@
+/********************************************************************************
+Padrão: Sincronização de Execução
+
+Pseudo-Código:
+    criação de 11 semáforos
+	criação dos filhos
+    
+    if(child) {
+        espera que o processo anterior desbloquei o semáforo
+        executes buy_beer() or buy_chips()
+        liberta o semáforo para o processo seguinte
+
+
+        espera pelo último semáforo 
+        eat_and_drink()
+        liberta o semáforo
+        exit
+    }
+
+
+    pai espera que os filhos terminem a sua execução 
+
+	eliminação dos semáforos
+
+*********************************************************************************/
+
 #include <errno.h>
 #include <fcntl.h>
 #include <semaphore.h>
