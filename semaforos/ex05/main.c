@@ -1,11 +1,25 @@
 /********************************************************************************
 
-Optou-se que o valor inicial do semáforo que faria a sincronização entre os dois
-processos fosse 0, devido ao processo pai só poder realizar a sua operação depois
-do filho.
+Padrão: Sincronização de Execução
 
-O filho desbloqueia o semáforo depois de finalizada a sua operação, e só depois é
-que o pai realiza o que lhe foi atribuído. 
+Pseudo-Código:
+    criação do semáforo para a sincronização de processos
+	
+	fork();
+    if(child) {
+        prints "I'm the child!"
+        desbloqueia semáforo
+        exit
+    }
+
+    if(father) {
+        down semáforo
+        prints "I'm the father!"
+        desbloqueia semáforo
+        exits
+    }
+	
+	eliminação do semáforo
 
 *********************************************************************************/
 
