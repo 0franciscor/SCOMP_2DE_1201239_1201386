@@ -1,8 +1,47 @@
 /********************************************************************************
 
-Optou-se que o valor inicial dos semáforos que fariam a sincronização entre os
-processos fosse 0, devido a que a realização do que foi atribuído a um processo 
-estar dependente dos outros. 
+Padrão: Sincronização de Execução
+
+Pseudo-Código:
+    criação de 3 semáforos para a sincronização de processos
+    criação de 3 filhos
+    
+    if(child id = 1) {
+        prints "Sistemas "
+        desbloqueia segundo semáforo 
+        espera pelo primeiro semáforo 
+        prints "a "
+        desbloqueia segundo semáforo 
+
+        exit
+    }
+
+    if(child id = 2) {
+        espera pelo segundo semáforo 
+        prints "de "
+        desbloqueia terceiro semáforo 
+
+        espera pelo segundo semáforo 
+        prints "melhor "
+        desbloqueia terceiro semáforo 
+
+        exit
+    }
+
+    if(child id = 3) {
+        espera pelo terceiro semáforo 
+        prints "Computadores - "
+        desbloqueia primeiro semáforo 
+
+        espera pelo terceiro semáforo 
+        prints "disciplina!"
+
+        exit
+    }
+
+    pai espera que os filhos terminem a execução
+
+	eliminar os semáforos 
 
 *********************************************************************************/
 
