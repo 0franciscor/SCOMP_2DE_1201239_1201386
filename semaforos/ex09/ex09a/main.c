@@ -12,7 +12,6 @@
 #include <unistd.h>
 
 
-#define NUM_SEMAPHORES 2
 #define QUANT_PROCESSOS 2
 #define SEM_CHIPS 0
 #define SEM_BEER 1
@@ -30,10 +29,6 @@ void up(sem_t *sem) {
 		exit(EXIT_FAILURE);
 	}
 }
-
-/*
- * In methods buy_ships and buy_beer they up the corresponding semaphore twice as there are 2 processes and so that both of them can only proceed once the process bought chips/beer
- */
 
 void buy_chips(char *processName, sem_t *semaforo) {
     printf("%s: buy_chips()\n", processName);
@@ -66,16 +61,19 @@ void eat_and_drink(char *processName) {
 }
 
 int main(int argc, char *argv[]) {
-	sem_t *sem[NUM_SEMAPHORES];
-	char sem_names[NUM_SEMAPHORES][20] = {"SEM_CHIPS", "SEM_BEER"};
-	int sem_values[NUM_SEMAPHORES] = {0, 0};
+
+	sem_t *semChips, *semBeer;
+
+    if ((semChips= sem_open("/SEM_CHIPS", O_CREAT, 0644, 0)) == SEM_FAILED ){
+        perror("Error in sem_open()");
+        exit(3);
+    }
+
+    if ((semBeer = sem_open("/SEM_BEER", O_CREAT, 0644, 0)) == SEM_FAILED ){
+        perror("Error in sem_open()");
+        exit(3);
+    }
 	
-	for (int i = 0; i < NUM_SEMAPHORES; i++) {
-		if ((sem[i] = sem_open(sem_names[i], O_CREAT | O_EXCL, 0644, sem_values[i])) == SEM_FAILED) {
-			perror("Error at sem_open().\n");
-			exit(0);
-		}
-	}
 	
 	for(int i = 0; i < QUANT_PROCESSOS; i++){
 		
@@ -89,12 +87,12 @@ int main(int argc, char *argv[]) {
         if( pid == 0){
 
 			if(i == 0) {
-				buy_chips("1", sem[SEM_CHIPS]);
-				if (sem_wait(sem[SEM_CHIPS]) == -1) {
+				buy_chips("1",semChips);
+				if (sem_wait(semChips) == -1) {
                     perror("Error at sem_wait().");
                     exit(3);
                 }
-				if (sem_wait(sem[SEM_BEER]e) == -1) {
+				if (sem_wait(semBeer) == -1) {
                     perror("Error at sem_wait().");
                     exit(3);
                 }
@@ -103,12 +101,12 @@ int main(int argc, char *argv[]) {
 			}
 	
 			if(i == 1) {
-				buy_beer("2", sem[SEM_BEER]);
-        		if (sem_wait(sem[SEM_CHIPS]) == -1) {
+				buy_beer("2",semBeer);
+        		if (sem_wait(semChips) == -1) {
                     perror("Error at sem_wait().");
                     exit(3);
                 }
-				if (sem_wait(sem[SEM_BEER]) == -1) {
+				if (sem_wait(semBeer) == -1) {
                     perror("Error at sem_wait().");
                     exit(3);
                 }
@@ -124,19 +122,15 @@ int main(int argc, char *argv[]) {
         wait(NULL);
     }
 
-    for (int i = 0; i < NUM_SEMAPHORES; i++) {
-		if (sem_close(sem[i]) == -1) {
-        perror("Error at sem_close().\n");
-        exit(0);
-		}
-	}
-    
-    for (int i = 0; i < NUM_SEMAPHORES; i++) {
-		if (sem_unlink(sem_names[i]) == -1) {
-        	perror("Error at sem_unlink().\n");
-        	exit(0);
-		}
-	}
+    if (shm_unlink("/SEM_CHIPS") < 0) {
+        printf("Error at shm_unlink()!\n");
+        exit(1);
+    }
+
+    if (shm_unlink("/SEM_BEER") == -1 ){
+        perror("Error in shm_unlink()");
+        exit(4);
+    }
 	
 	return 0;
 }
