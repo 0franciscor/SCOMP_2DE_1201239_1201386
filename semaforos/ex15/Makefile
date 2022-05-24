@@ -1,8 +1,11 @@
-main: main.c
-	gcc -g -Wall main.c -o main.o -lrt -lpthread
+prog_sem: main.o
+	gcc main.o -o prog_sem -lrt -lpthread
 
-run: main
-	./main.o
+main.o: main.c
+	gcc -g -Wall -c main.c -o main.o
 
 clean:
-	rm *.o main
+	rm -f *.o prog_sem
+
+run: prog_sem
+	./prog_sem

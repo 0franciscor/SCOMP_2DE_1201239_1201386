@@ -93,8 +93,15 @@ int main(){
             // Produtores
 
             for(int j = 0; j < 30; j++) {
-            sem_wait(canWrite);
-            sem_wait(index_access);
+            if (sem_wait(canWrite) == -1) {
+                perror("Error at sem_wait().");
+                exit(3);
+            }
+            
+            if (sem_wait(index_access) == -1) {
+                perror("Error at sem_wait().");
+                exit(3);
+            }
             int head = infoPartilhada->head;
 
             // Alterar os números escritos
@@ -107,8 +114,15 @@ int main(){
                 infoPartilhada->head = head + 1;
             }
 
-            sem_post(index_access);
-            sem_post(canRead);
+            if (sem_post(index_access) == -1) {
+                perror("Error at sem_post().");
+                exit(3);
+            }
+           
+            if (sem_post(canRead) == -1) {
+                perror("Error at sem_post().");
+                exit(3);
+            }
         }
 
             exit(0);
@@ -118,8 +132,16 @@ int main(){
 
     // Consumidor
     for(int i = 0; i < 60; i++) {
-            sem_wait(canRead);
-            sem_wait(index_access);
+
+            if (sem_wait(canRead) == -1) {
+                perror("Error at sem_wait().");
+                exit(3);
+            }
+            
+            if (sem_wait(index_access) == -1) {
+                perror("Error at sem_wait().");
+                exit(3);
+            }
             
             int tail =  infoPartilhada->tail;
 
@@ -133,8 +155,15 @@ int main(){
 
             // imprimir a informação
 
-            sem_post(index_access);
-            sem_post(canWrite);
+            if (sem_post(index_access) == -1) {
+                perror("Error at sem_post().");
+                exit(3);
+            }
+           
+            if (sem_post(canWrite) == -1) {
+                perror("Error at sem_post().");
+                exit(3);
+            }
 
         }
 
