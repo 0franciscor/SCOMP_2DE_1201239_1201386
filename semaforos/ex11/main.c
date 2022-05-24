@@ -1,3 +1,31 @@
+/********************************************************************************
+
+Pseudo-Código:
+    criação de 2 semáforos: 1 inicializado com 3, número de portas, outro inicializado com 200, capacidade do comboio
+    
+    for each passageirp {
+
+        espera que tenha capacidade para entrar
+        espera que exista uma porta livre para entrar
+        imprime informação
+        liberta a porta
+
+        for each passageiro que queira sair {
+            espera que exista uma porta livre para sair
+            imprime informação
+            liberta a porta
+            liberta o semáforo relativo à capacidade
+        }
+        exit
+    }
+
+
+    pai espera que todos os filhos terminem a execução 
+
+	eliminação dos semáforos
+
+********************************************************************************/
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
