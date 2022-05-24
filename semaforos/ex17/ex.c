@@ -32,7 +32,7 @@ void up(sem_t *sem) {
 
 
 int main(int argc, char *argv[]) {
-	/************ Creating Needed Semaphores ************/
+	
 	sem_t *exclusion, *capacidade, *semSpecial, *semVip;
 
 	// mutual exclusion
@@ -60,9 +60,7 @@ int main(int argc, char *argv[]) {
         perror("Error in sem_open()");
         exit(3);
     }
-	/************ End of Creating Semaphores ************/
-	
-	/************ Creating Shared Memory Area ************/
+
 
 	int size = sizeof(info); 
     info *infoPartilhada;
@@ -82,14 +80,11 @@ int main(int argc, char *argv[]) {
 
     infoPartilhada = (info*) mmap(NULL, size,PROT_READ|PROT_WRITE,MAP_SHARED, fd, 0);
 
-	/************ End of Creating Shared Memory Area ************/
-	
-	//Initializing Cinema
+
+
 	infoPartilhada->quant=0;
 	infoPartilhada->vipsWaiting=0;
 	infoPartilhada->specialsWaiting=0;
-
-	/************ CLIENTS ************/
 	for (int i = 0; i < QUANT_PROCESSOS; i++)
 	{
 		pid_t pid = fork();
