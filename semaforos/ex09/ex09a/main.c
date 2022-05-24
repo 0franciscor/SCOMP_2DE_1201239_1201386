@@ -122,13 +122,13 @@ int main(int argc, char *argv[]) {
         wait(NULL);
     }
 
-    if (shm_unlink("/SEM_CHIPS") < 0) {
-        printf("Error at shm_unlink()!\n");
+    if (sem_unlink("/SEM_CHIPS") < 0) {
+        printf("Error at sem_unlink()!\n");
         exit(1);
     }
 
-    if (shm_unlink("/SEM_BEER") == -1 ){
-        perror("Error in shm_unlink()");
+    if (sem_unlink("/SEM_BEER") == -1 ){
+        perror("Error in sem_unlink()");
         exit(4);
     }
 	
