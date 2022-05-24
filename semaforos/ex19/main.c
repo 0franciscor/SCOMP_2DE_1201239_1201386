@@ -1,8 +1,59 @@
 /********************************************************************************
 
+Padrão: Leitores / Escritores
 
+Pseudo-Código:
+	criação de 3 semáforos
+	criação e iniciaização da memória partilhada 
 
-*********************************************************************************/
+	criação dos sensores
+	for every sensor {
+
+		for each medição {
+
+		
+			verifica se pode escrever
+			gera a medição
+			guarda a medição na posição indicada
+			
+			if(existir medição anterior) {
+				obter medição anterior
+				if(medição atual < 50 and medição anterior < 50) {
+					diminui o número de sensores em estado de alarme 
+				}
+			} else {
+				if(medição atual < 50) {
+					diminui o número de sensores em estado de alarme 
+				}
+			}
+
+            if(medição> 50) 
+			    aumenta o número de sensores em estado de alarme 
+			}
+		}
+
+		altera o index do próximo valor a escrever
+		guarda o sensor que
+		
+		desbloqueia semáforo de leitura
+		espera pelo semáforo de sincronização
+		desbloqueia semáforo de escrita
+		sleeps
+		}
+		exit
+	}
+
+	controlador 
+	for each medição {
+		obtêm o sensor que escreveu
+		obtêm o valor escrito
+		imprime a informação
+		desbloqueia semáforo de sincronização
+	}
+
+	elimina os semáforos e a área de memória partilhada
+	
+********************************************************************************/
 
 
 #include <stdio.h>
