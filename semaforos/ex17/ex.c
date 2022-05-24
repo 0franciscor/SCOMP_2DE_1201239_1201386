@@ -1,3 +1,92 @@
+/********************************************************************************
+
+Pseudo-Código:
+	cria 4 semáforos
+	criação e iniciaização da memória partilhada 
+
+	initializes cinema
+    for each normal client {
+    
+        decrements semaphore MUTEX
+        gets special clients waiting from shared memory
+        gets vip clients waiting from shared memory
+        increments semaphore MUTEX
+
+        if there are specials waiting {
+            decrements semaphore SEM_SPECIAL
+        }
+
+        if there are vips waiting {
+            decrements semaphore SEM_VIP
+        }
+
+        decrements semaphore SEM_CAPACITY
+        prints that normal client entered
+        sleeps simulating time of club
+        increments semaphore SEM_CAPACITY
+        prints normal client left and time at the club
+
+        exits
+    }
+
+    for each special client {
+        decrements semaphore SEM_MUTEX
+        increments specials waiting
+        gets vipsWaiting
+        increments semaphore SEM_MUTEX
+
+        if there are vips waiting {
+            decrements semaphore SEM_VIP   
+        }
+
+        decrements semaphore SEM_CAPACITY
+
+        decrements semaphore SEM_MUTEX
+        decrements specials waiting
+        saves specials waiting in shared memory
+        increments semaphore SEM_MUTEX
+
+        if there are no specials waiting {
+            increments semaphore SEM_SPECIAL
+        }
+
+        prints special client entered
+        sleeps simulating time of club
+        increments semaphore SEM_CAPACITY
+        prints normal special left and time at the club
+    }
+    
+    for each vip client {
+        prints vip waiting to enter
+        increments specials waiting
+        decrements semaphore SEM_MUTEX
+        increments vips waiting
+        increments semaphore SEM_MUTEX
+
+        decrements semaphore SEM_CAPACITY
+
+        decrements semaphore SEM_MUTEX
+        decrements vips waiting
+        saves vips waiting in the shared memory
+        increments semaphore SEM_MUTEX
+
+        if there are no vips waiting {
+            increments semaphore SEM_VIP
+        }
+
+        prints vip client entered
+        sleeps simulating time of club
+        increments semaphore SEM_CAPACITY
+        prints vip client left and time at the club
+    }
+
+
+
+	elimina os semáforos e a área de memória partilhada
+}
+	
+********************************************************************************/
+
 #include <errno.h>
 #include <fcntl.h>
 #include <semaphore.h>
@@ -65,11 +154,11 @@ int main(int argc, char *argv[]) {
 	int size = sizeof(info); 
     info *infoPartilhada;
 
-    int fd = shm_open("/exerc",O_CREAT|O_EXCL|O_RDWR,S_IRUSR|S_IWUSR); 
+    int fd = shm_open("/exerci",O_CREAT|O_EXCL|O_RDWR,S_IRUSR|S_IWUSR); 
 
     if(fd == -1){
 		perror("Creating or opening shared memory failure");
-		shm_unlink("/exerc");
+		shm_unlink("/exerci");
 		exit(1);
 	}
 
@@ -285,7 +374,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (shm_unlink("/exerc") < 0) {
+    if (shm_unlink("/exerci") < 0) {
         printf("Error at shm_unlink()!\n");
         exit(1);
     }
