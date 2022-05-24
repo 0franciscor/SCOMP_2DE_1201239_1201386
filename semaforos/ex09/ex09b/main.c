@@ -12,21 +12,8 @@
 #include <unistd.h>
 #include <time.h>
 
-/*
- * STRATEGY
- * 
- * There are 11 semaphores. The processes will execute sequentially through semaphores syncronization the buy_deer() OR buy_chips (chosen randomly using rand()) ;
- * Each will only execute the eat_and_drink() only when the last process will unblock the SEM_11.
- * 
- */ 
-
-
 #define NUM_SEMAPHORES 11
 #define QUANT_PROCESSOS 10
-#define SEM_1 0
-#define SEM_2 1
-#define MIN 0
-#define MAX 1
 
 void buy_chips(int processId) {
     printf("%d: buy_chips()\n", processId);
@@ -44,9 +31,7 @@ int main(int argc, char *argv[]) {
 	sem_t *sem[NUM_SEMAPHORES];
 	char sem_names[NUM_SEMAPHORES][20] = {"SEM_1", "SEM_2", "SEM_3", "SEM_4", "SEM_5", "SEM_6", "SEM_7", "SEM_8", "SEM_9", "SEM_10", "SEM_11"};
 	int sem_values[NUM_SEMAPHORES] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	int option;
-	int value;
-	
+
 	for (int i = 0; i < NUM_SEMAPHORES; i++) {
 		if ((sem[i] = sem_open(sem_names[i], O_CREAT | O_EXCL, 0644, sem_values[i])) == SEM_FAILED) {
 			perror("Error at sem_open().\n");
@@ -70,10 +55,13 @@ int main(int argc, char *argv[]) {
                 perror("Error at sem_wait().");
                 exit(3);
             }
-			switch(rand() % MAX) {
-				case 0: buy_beer(i+1); break;
-				case 1: buy_chips(i+1); break;
+
+			if(i<QUANT_PROCESSOS/2){
+				buy_beer(i+1);
+			} else {
+				buy_chips(i+1);
 			}
+			
 			if (sem_post(sem[i+1]) == -1) {
         		perror("Error at sem_post().");
         		exit(3);
@@ -82,7 +70,7 @@ int main(int argc, char *argv[]) {
                 perror("Error at sem_wait().");
                 exit(3);
             }
-			eat_and_drink(id);
+			eat_and_drink(i+1);
 			if (sem_post(sem[NUM_SEMAPHORES - 1]) == -1) {
         		perror("Error at sem_post().");
         		exit(3);
